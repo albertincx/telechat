@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const compress = require('compression');
@@ -37,8 +38,10 @@ app.use(cors());
 if (process.env.DEV) {
   app.use('/apidoc', express.static(`${__dirname}/../../public/docs`));
 }
+let pp = `${__dirname}/../../public/app/index.html`;
+console.log(fs.existsSync(pp))
 app.use('/popup', express.static(`${__dirname}/../../public/popup`));
-app.use('/app', express.static(`${__dirname}/../../public/app`));
+app.use('/apps', express.static(`${__dirname}/../../public/app`));
 
 app.use('/app', srv);
 

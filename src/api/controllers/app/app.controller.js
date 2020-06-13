@@ -20,7 +20,7 @@ exports.app = async (req, res, next) => {
     let style = '';
     let position = '';
     if (styleFromUrl) style = styleFromUrl;
-    let appUrl = `${API}/app/`;
+    let appUrl = `${API}/apps/`;
     if (devurl) {
       appUrl = devurl;
     }
