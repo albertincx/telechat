@@ -41,7 +41,7 @@ if (process.env.DEV) {
 let pp = `${__dirname}/../../public/app/index.html`;
 console.log(fs.existsSync(pp))
 app.use('/popup', express.static(`${__dirname}/../../public/popup`));
-app.use('/apps',express.static(`${__dirname}/../../public/app`));
+app.use('/apps',express.static(`${__dirname}/../../public/apps`));
 
 app.use('/app', srv);
 

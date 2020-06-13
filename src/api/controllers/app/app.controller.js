@@ -40,7 +40,7 @@ exports.app = async (req, res, next) => {
       var styled = location.href.match(/style=[a-z]+/);
       if (styled) style = styled[0].replace(/style=/,'');
       var ch = document.createElement('div');
-      ch.setAttribute('id', "apppopupmax1");
+      ch.setAttribute('id', "apppopupmax");
       document.body.appendChild(ch);
       var srcs = resp.match(/src="(.*?)"|href="(.*?)"/g);
       var cssFound = '';
