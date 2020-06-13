@@ -63,8 +63,8 @@ module.exports = (bot, conn) => {
   startCnt += 1;
   if (startCnt >= 500) startCnt = 0;
 
-  const wss = new WebSocket.Server({ port: 8080 });
-  global.arsfChatSocket = 'localhost:8080';
+  const wss = new WebSocket.Server({ port: 3000 });
+  global.arsfChatSocket = (process.env.APP_DOMAINNAME ? process.env.APP_DOMAINNAME : 'localhost') + ':3000';
 
   wss.on('connection', ws => {
     ws.on('message', message => {
