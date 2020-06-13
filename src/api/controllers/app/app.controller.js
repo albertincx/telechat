@@ -53,7 +53,7 @@ exports.app = async (req, res, next) => {
         if (!src) continue;
         if(isJs) {
         var tag = document.createElement('script');
-        tag.src = src+'${srcPost}';
+        tag.src = src+srcPost;
         document.getElementsByTagName("head")[0].appendChild(tag);
         }
       }
