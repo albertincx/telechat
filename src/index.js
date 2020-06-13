@@ -5,7 +5,6 @@ const app = require('./config/express');
 const botroute = require('./api/routes/botroute');
 const api = require('./api/routes/api');
 const conn = mongoose.connect();
-
 if(process.env.FILESLAVE) {
   app.get('/', (req, res) => res.send('use telegram bot <a href="tg://resolve?domain=InstantChatBot">@InstantChatBot</a>'));
   app.use(api);

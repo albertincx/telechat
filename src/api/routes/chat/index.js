@@ -58,12 +58,10 @@ const back = ({ reply }) => {
 };
 
 const startOrHelp = ({ reply, ...msg }) => {
-  //console.log(reply);
   const opts = {};
 
   let code = '';
   if (msg.update && msg.update.message) {
-    // console.log(msg.update, msg.update.message.entities);
     let ID = '';
     const str = msg.update.message.text.match('-?[0-9]+');
     if (str && str[0]) {
@@ -88,7 +86,6 @@ const createIvTxt = ({ reply }) => {
   const opts = {
     reply_markup: { force_reply: true },
   };
-  console.log(opts);
   reply(txtDocMessage, opts).catch(() => {});
 };
 
@@ -104,7 +101,7 @@ module.exports = (bot, botHelper) => {
   bot.command(buttons.createTxt.command, createIvTxt);
 
   bot.action(/.*/, async (ctx) => {
-    console.log(ctx);
+    // console.log(ctx);
     const [data] = ctx.match;
     const s = data === 'no_img';
     if (s) {
@@ -147,18 +144,18 @@ module.exports = (bot, botHelper) => {
       if (rpl.text === txtDocMessage) {
         document = msg.text;
       } else if (!document) {
-        console.log('rpl', rpl);
-        botHelper.sockSend(chatId, text)
+        await botHelper.sockSend(chatId, text);
         return;
       }
     }
 
     const isAdm = botHelper.isAdmin(chatId);
 
-    if (msg.new_chat_participant || msg.left_chat_participant) {
+    if (msg.new_chat_participant || msg.left_chat_participant ||
+      msg.group_chat_created) {
       let s = msg.left_chat_participant ? 'left' : 'add';
-      if (msg.new_chat_participant && msg.new_chat_participant.username ===
-        username) {
+      if ((msg.new_chat_participant && msg.new_chat_participant.username ===
+        username) || msg.group_chat_created) {
         const res = await reply(messages.start(username, chatId)).catch(
           () => {}) ||
           {};

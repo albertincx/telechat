@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { putChat } = require('../utils/db');
 const TGADMIN = parseInt(process.env.TGADMIN);
 const _OFF = 'Off';
 const _ON = 'On';
@@ -184,20 +185,21 @@ class BotHelper {
     return this.bot.forwardMessage(to, from, mid);
   }
 
-  sockSend(chatId, txt) {
+  async sockSend(chatId, txt) {
     let key = +chatId;
     try {
       if (key < 0) {
         key *= -1;
         key = `${key}`;
         if (this.sockets.g[key]) {
-          this.sockets.g[key].send(txt);
+          this.sockets.g[key].ws.send(txt);
         }
       } else {
         if (this.sockets.u[key]) {
-          this.sockets.u[key].send(txt);
+          this.sockets.u[key].ws.send(txt);
         }
       }
+      await putChat({ message: txt, sender: 'admin' }, key);
     } catch (e) {
       console.log(e);
     }
