@@ -1,6 +1,10 @@
 const fs = require('fs');
 const express = require('express');
+<<<<<<< HEAD
 
+=======
+const WebSocket = require('ws');
+>>>>>>> 44d5633fd3a2eac5042fed894b309cbf9633daf7
 const BotHelper = require('../utils/bot');
 const format = require('./chat');
 const db = require('../utils/db');
@@ -10,9 +14,15 @@ const filepath = 'count.txt';
 if (!fs.existsSync(filepath)) fs.writeFileSync(filepath, 0);
 
 let startCnt = parseInt(fs.readFileSync('count.txt'), 10);
+<<<<<<< HEAD
 
 module.exports = (bot, conn) => {
   const botHelper = new BotHelper(bot.telegram);
+=======
+const sockets = { g: {}, u: {} };
+module.exports = (bot, conn) => {
+  const botHelper = new BotHelper(bot.telegram, sockets);
+>>>>>>> 44d5633fd3a2eac5042fed894b309cbf9633daf7
   if (conn) conn.on('error', (err) => {
     botHelper.disDb();
   });
@@ -63,7 +73,34 @@ module.exports = (bot, conn) => {
   startCnt += 1;
   if (startCnt >= 500) startCnt = 0;
 
+<<<<<<< HEAD
   
+=======
+  const wss = new WebSocket.Server({ port: 8080 });
+  global.arsfChatSocket = 'localhost:8080';
+
+  wss.on('connection', ws => {
+    ws.on('message', message => {
+      let messageObj = {};
+      try {
+        messageObj = JSON.parse(message);
+        if (messageObj.g) {
+          let key = `${messageObj.g}`
+          if (!sockets.g[key]) {
+            sockets.g[key] = ws;
+            ws.on('close', () => {
+              delete sockets.g[key];
+            });
+          }
+          botHelper.botMes(+messageObj.g * -1, messageObj.message);
+        }
+      } catch (e) {
+        botHelper.sendAdmin(message);
+      }
+    });
+    ws.send(JSON.stringify({ message: 'Hi' }));
+  });
+>>>>>>> 44d5633fd3a2eac5042fed894b309cbf9633daf7
   fs.writeFileSync(filepath, startCnt);
   return { router, bot: botHelper };
 };

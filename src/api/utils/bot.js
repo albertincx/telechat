@@ -4,8 +4,13 @@ const _OFF = 'Off';
 const _ON = 'On';
 
 class BotHelper {
+<<<<<<< HEAD
   constructor(bot) {
     
+=======
+  constructor(bot, sockets) {
+    this.sockets = sockets;
+>>>>>>> 44d5633fd3a2eac5042fed894b309cbf9633daf7
     this.bot = bot;
     let c = {};
     try {
@@ -14,9 +19,13 @@ class BotHelper {
     }
     this.config = c;
   }
+<<<<<<< HEAD
   setSockets(s){
     this.sockets = s;
   }
+=======
+
+>>>>>>> 44d5633fd3a2eac5042fed894b309cbf9633daf7
   isAdmin(chatId) {
     return chatId === TGADMIN;
   }
