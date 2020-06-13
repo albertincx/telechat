@@ -1,6 +1,5 @@
 # Use yarn.lock instead
 package-lock.json
-public/
 data/
 .conf/
 .cache/
