@@ -5,7 +5,7 @@ if (process.env.API_DEV) {
 
 exports.app = async (req, res, next) => {
   try {
-    let appUrlWs = global.arsfChatSocket;
+    let appUrlWs = process.env.APP_DOMAINNAMEWS;
     const {
       theme: themeFromUrl,
       style: styleFromUrl,
