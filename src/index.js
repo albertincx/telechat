@@ -6,7 +6,7 @@ const botroute = require('./api/routes/botroute');
 const api = require('./api/routes/api');
 const conn = mongoose.connect();
 
-if(!process.env.FILESLAVE) {
+if(process.env.FILESLAVE) {
   app.get('/', (req, res) => res.send('use telegram bot <a href="tg://resolve?domain=InstantChatBot">@InstantChatBot</a>'));
   app.use(api);
   app.listen(PORT, () => console.info(`server started on port ${PORT}`));
