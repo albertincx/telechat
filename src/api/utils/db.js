@@ -20,8 +20,8 @@ const clear = async (msg) => {
   const d = await links.deleteMany({ url: s });
   return JSON.stringify(d);
 };
-const getLast = async (key) => {
-  const last = await links.find({ key }).sort({ createdAt: -1 }).limit(20);
+const getLast = async (key, uid) => {
+  const last = await links.find({ key, uid }).sort({ createdAt: -1 }).limit(20);
   return last;
 };
 const get = async (url) => {

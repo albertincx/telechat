@@ -24,7 +24,7 @@ module.exports = (botHelper) => {
         if (messageObj.g) {
           let key = `${messageObj.g}`;
           if (!sockets.g[key]) {
-            const lastMess = await getLast(key);
+            const lastMess = await getLast(key,messageObj.uid);
             sockets.g[key] = { ws, userId: messageObj.uid };
             if (isUndef || lastMess.length) {
               const service = { service: 'setUid', message: messageObj.uid };

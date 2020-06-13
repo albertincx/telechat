@@ -59,24 +59,42 @@ const back = ({ reply }) => {
 
 const startOrHelp = ({ reply, ...msg }) => {
   const opts = {};
-
-  let code = '';
-  if (msg.update && msg.update.message) {
-    let ID = '';
-    const str = msg.update.message.text.match('-?[0-9]+');
-    if (str && str[0]) {
-      ID = +str[0];
-      let par = 'g';
-      if (ID > 0) par = 'u'; else {
-        ID *= -1;
+  let text = messages.startEmpty();
+  try {
+    if (msg.update && msg.update.message) {
+      let ID = '';
+      const str = msg.update.message.text.match('-?[0-9]+');
+      if (str && str[0]) {
+        ID = +str[0];
+        let par = 'g';
+        if (ID > 0) par = 'u'; else {
+          ID *= -1;
+        }
+        let codes = [];
+        codes.push(
+          `<script src="//${process.env.APP_DOMAINNAME2}/app/chatbot?${par}=${ID}" async></script>
+<script type="text/javascript">window.instantChatBotUidName = 'userId'</script>`);
+        codes.push(' window.instantChatBotUidName = \'userId\';'
+          + 'var newScript = document.createElement(\'script\');'
+          + 'newScript.type = \'text/javascript\';'
+          +
+          'newScript.src = \'' +
+          `//${process.env.APP_DOMAINNAME2}/app/chatbot?${par}=${ID}` + '\';'
+          +
+          'document.getElementsByTagName("head")[0].appendChild(newScript);');
+        text = messages.startCode(codes) + `\n\n instantChatBotUidName - unique user id`;
+        opts.parse_mode = 'Markdown';
+      } else {
+        if (msg.update.message.chat.id < 0) {
+          text = messages.start(username, msg.update.message.chat.id);
+        }
       }
-      code = `<script src="//${process.env.APP_DOMAINNAME2}/app/chatbot?${par}=${ID}" async></script>`;
-      opts.parse_mode = 'Markdown';
     }
+  } catch (e) {
+    console.log(e);
   }
 
-  reply(code ? messages.startCode(code) : messages.startEmpty(), opts).catch(
-    () => {});
+  reply(text, opts).catch((e) => console.log(e));
 };
 const createIv = ({ reply }) => {
   reply(messages.createIv(), keyboards.createIv()).catch(() => {});
@@ -162,59 +180,6 @@ module.exports = (bot, botHelper) => {
       }
       botHelper.sendAdmin(`support ${s}${JSON.stringify(msg)}`);
       return;
-    }
-
-    if (document) {
-      const res = await reply('Wait...').catch(() => {}) ||
-        {};
-      const message_id = res && res.message_id;
-      return;
-    }
-
-    if (caption) {
-      text = caption;
-      if (caption_entities) entities = caption_entities;
-    }
-    if (msg && text) {
-      const force = isAdm && botHelper.checkForce(text);
-      let links = getAllLinks(text);
-      try {
-        let link = links[0];
-        if (!link && entities) {
-          links = getLinkFromEntity(entities, text);
-        }
-        link = getLink(links);
-        if (!link) return;
-        const parsed = url.parse(link);
-        if (link.match(/^(https?:\/\/)?(www.)?google/)) {
-          const l = link.match(/url=(.*?)($|&)/);
-          if (l && l[1]) link = decodeURIComponent(l[1]);
-        }
-        if (link.match(new RegExp(validRegex))) {
-          if (botHelper.db !== false) {
-            await log({ link, type: 'return' });
-          }
-          reply(messages.showIvMessage('', link, link),
-            { parse_mode: 'Markdown' });
-          return;
-        }
-        if (!parsed.pathname) {
-          if (botHelper.db !== false) {
-            await log({ link, type: 'nopath' });
-          }
-          return;
-        }
-        const res = await reply('Waiting for instantView...').catch(() => {}) ||
-          {};
-        const message_id = res && res.message_id;
-        if (!message_id) throw new Error('blocked');
-        const rabbitMes = { message_id, chatId, link };
-        if (force) {
-          rabbitMes.force = force;
-        }
-      } catch (e) {
-        botHelper.sendError(e);
-      }
     }
   };
   bot.hears(/.*/, (ctx) => addToQueue(ctx));
