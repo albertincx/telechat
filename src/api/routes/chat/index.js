@@ -58,7 +58,7 @@ const back = ({ reply }) => {
 };
 
 const startOrHelp = ({ reply, ...msg }) => {
-  console.log(reply);
+  //console.log(reply);
   const opts = {};
 
   let code = '';
@@ -66,13 +66,13 @@ const startOrHelp = ({ reply, ...msg }) => {
     // console.log(msg.update, msg.update.message.entities);
     let ID = '';
     const str = msg.update.message.text.match('-?[0-9]+');
-    if (str) {
+    if (str && str[0]) {
       ID = +str[0];
       let par = 'g';
       if (ID > 0) par = 'u'; else {
         ID *= -1;
       }
-      code = `<script src="${process.env.APP_DOMAIN}/app/chatbot?${par}=${ID}" async></script>`;
+      code = `<script src="//${process.env.APP_DOMAINNAME2}/app/chatbot?${par}=${ID}" async></script>`;
       opts.parse_mode = 'Markdown';
     }
   }
