@@ -4,8 +4,8 @@ const _OFF = 'Off';
 const _ON = 'On';
 
 class BotHelper {
-  constructor(bot, sockets) {
-    this.sockets = sockets;
+  constructor(bot) {
+    
     this.bot = bot;
     let c = {};
     try {
@@ -14,7 +14,9 @@ class BotHelper {
     }
     this.config = c;
   }
-
+  setSockets(s){
+    this.sockets = s;
+  }
   isAdmin(chatId) {
     return chatId === TGADMIN;
   }
