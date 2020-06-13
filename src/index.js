@@ -17,5 +17,5 @@ if (!NOBOT && process.env.TBTKN) {
     app.use('/bot', router);
   }
 }
-app.listen(PORT, () => console.info(`server started on port ${PORT}`));
+app.listen(4000, () => console.info(`server started on port ${PORT}`));
 module.exports = app;
