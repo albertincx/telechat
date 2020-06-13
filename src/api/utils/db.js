@@ -1,7 +1,9 @@
 const Any = require('../models/any.model');
 
-const links = Any.collection.conn.model(process.env.MONGO_COLL_LINKS || 'links', Any.schema);
-const logs = Any.collection.conn.model(process.env.MONGO_COLL_LOGS || 'logs', Any.schema);
+const links = Any.collection.conn.model(
+  process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
+const logs = Any.collection.conn.model(process.env.MONGO_COLL_LOGS || 'logs',
+  Any.schema);
 
 const stat = async () => {
   const cnt = await links.countDocuments();
@@ -18,7 +20,10 @@ const clear = async (msg) => {
   const d = await links.deleteMany({ url: s });
   return JSON.stringify(d);
 };
-
+const getLast = async (key) => {
+  const last = await links.find({ key }).sort({ createdAt: -1 }).limit(20);
+  return last;
+};
 const get = async (url) => {
   const me = await links.findOne({ url });
   if (me) {
@@ -38,9 +43,19 @@ const log = async (item) => {
   item.$inc = { affects: 1 };
   return logs.updateOne({ url }, item, { upsert: true });
 };
-
+const putChat = async ({ g,u,pathname,host,...item }, key) => {
+  return links.bulkWrite([
+    {
+      insertOne: {
+        document: { key, ...item },
+      },
+    },
+  ]);
+};
 module.exports.stat = stat;
 module.exports.clear = clear;
 module.exports.updateOne = updateOne;
 module.exports.get = get;
+module.exports.getLast = getLast;
+module.exports.putChat = putChat;
 module.exports.log = log;
