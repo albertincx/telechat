@@ -10,9 +10,6 @@ module.exports = (botHelper) => {
     ? process.env.APP_DOMAINNAME
     : 'localhost') + ':' + PORT;
 
-  wss.on('disconnect', ws => {
-    console.log(ws);
-  });
   wss.on('connection', ws => {
     ws.on('message', async message => {
       let messageObj = {};
