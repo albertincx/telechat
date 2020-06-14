@@ -36,7 +36,7 @@ class BotHelper {
       if (key < 0) {
         kkey = key * -1;
       }
-      kkey = `#group${key}:`;
+      kkey = `#group-${key}:`;
     }
     return this.bot.sendMessage(chatId, text, opts).
       catch(e => {
@@ -121,6 +121,7 @@ class BotHelper {
       chatId = guid[1];
     }
     let key = +chatId;
+
     try {
       if (key < 0) {
         key *= -1;

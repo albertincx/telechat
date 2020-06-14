@@ -10,38 +10,6 @@ const { validRegex } = require('../../../config/config.json');
 const FILESLAVE = process.env.FILESLAVE;
 let username = process.env.TBTUSERNAME;
 
-const getLinkFromEntity = (entities, txt) => {
-  let links = [];
-  for (let i = 0; i < entities.length; i += 1) {
-    if (entities[i].url) {
-      links.push(entities[i].url);
-      continue;
-    }
-    if (entities[i].type === 'url') {
-      let checkFf = txt.substr(0, entities[i].length + 1).match(/\[(.*?)\]/);
-      if (!checkFf) {
-        links.push(txt.substr(entities[i].offset, entities[i].length));
-      }
-    }
-  }
-  return links;
-};
-
-function getLink(links) {
-  let lnk = links[0];
-  for (let i = 1; i < links.length; i += 1) {
-    if (links[i].startsWith(lnk)) {
-      lnk = links[i];
-    }
-  }
-  return lnk;
-}
-
-function getAllLinks(text) {
-  const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig;
-  return text.match(urlRegex) || [];
-}
-
 const support = ({ reply }) => {
   const sup = [];
   for (let i = 0; i < 5; i += 1) {
@@ -155,7 +123,7 @@ module.exports = (bot, botHelper) => {
     }
     logger(msg);
 
-    let { reply_to_message, entities, caption_entities } = msg;
+    let { reply_to_message,  } = msg;
     let document = msg.document;
     let rpl = reply_to_message;
     if (!document && rpl) document = rpl.document;
@@ -169,8 +137,6 @@ module.exports = (bot, botHelper) => {
         return;
       }
     }
-
-    const isAdm = botHelper.isAdmin(chatId);
 
     if (msg.new_chat_participant || msg.left_chat_participant ||
       msg.group_chat_created) {
