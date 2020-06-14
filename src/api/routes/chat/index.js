@@ -90,7 +90,6 @@ module.exports = (bot, botHelper) => {
   bot.command(buttons.createTxt.command, createIvTxt);
 
   bot.action(/.*/, async (ctx) => {
-    // console.log(ctx);
     const [data] = ctx.match;
     const s = data === 'no_img';
     if (s) {
@@ -143,12 +142,10 @@ module.exports = (bot, botHelper) => {
       let s = msg.left_chat_participant ? 'left' : 'add';
       if ((msg.new_chat_participant && msg.new_chat_participant.username ===
         username) || msg.group_chat_created) {
-        const res = await reply(messages.start(username, chatId)).catch(
-          () => {}) ||
-          {};
+        await reply(messages.start(username, chatId)).catch(
+          () => {});
       }
       botHelper.sendAdmin(`support ${s}${JSON.stringify(msg)}`);
-      return;
     }
   };
   bot.hears(/.*/, (ctx) => addToQueue(ctx));
