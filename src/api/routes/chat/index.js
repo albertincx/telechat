@@ -57,7 +57,7 @@ const back = ({ reply }) => {
   reply(messages.menu(), keyboards.start()).catch(() => {});
 };
 
-const startOrHelp = ({ reply, ...msg }) => {
+const startOrHelp = ({ reply, ...msg }, botHelper) => {
   const opts = {};
   let text = messages.startEmpty();
   try {
@@ -95,6 +95,7 @@ const startOrHelp = ({ reply, ...msg }) => {
   }
 
   reply(text, opts).catch((e) => console.log(e));
+  botHelper.sendAdmin(`${JSON.stringify(msg)}`);
 };
 const createIv = ({ reply }) => {
   reply(messages.createIv(), keyboards.createIv()).catch(() => {});
@@ -108,7 +109,7 @@ const createIvTxt = ({ reply }) => {
 };
 
 module.exports = (bot, botHelper) => {
-  bot.command(['/start', buttons.help.command], startOrHelp);
+  bot.command(['/start', buttons.help.command], ctx => startOrHelp(ctx, botHelper));
   bot.hears(buttons.help.label, startOrHelp);
   bot.hears(buttons.back.label, back);
   bot.hears(buttons.support.label, support);
