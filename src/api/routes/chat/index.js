@@ -57,7 +57,7 @@ const back = ({ reply }) => {
   reply(messages.menu(), keyboards.start()).catch(() => {});
 };
 
-const startOrHelp = ({ reply, ...msg }, botHelper) => {
+const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
   const opts = {};
   let text = messages.startEmpty();
   try {
@@ -95,7 +95,7 @@ const startOrHelp = ({ reply, ...msg }, botHelper) => {
   }
 
   reply(text, opts).catch((e) => console.log(e));
-  botHelper.sendAdmin(`${JSON.stringify(msg)}`);
+  botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
 };
 const createIv = ({ reply }) => {
   reply(messages.createIv(), keyboards.createIv()).catch(() => {});
