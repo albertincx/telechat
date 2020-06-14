@@ -44,10 +44,7 @@ module.exports = (botHelper) => {
             await putChat(messageObj, key);
           }
           botHelper.botMes(+messageObj.g * -1, `
-          #u${messageObj.uid}:\n${messageObj.message}`).catch(e => {
-            botHelper.botMes(process.env.TGGROUP, `
-          #u${messageObj.uid}:\n${messageObj.message}`);
-          });
+          #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g);
         }
       } catch (e) {
         botHelper.sendAdmin(e);

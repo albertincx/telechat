@@ -25,13 +25,23 @@ class BotHelper {
     return chatId === TGADMIN;
   }
 
-  botMes(chatId, text, mark = true) {
+  botMes(chatId, text, key, mark = true) {
     let opts = {};
     if (mark) {
       opts = { parse_mode: 'Markdown' };
     }
+    let kkey = '';
+    if (key) {
+      key = +key
+      if (key < 0) {
+        kkey = key * -1;
+      }
+      kkey = `#group${key}:`;
+    }
     return this.bot.sendMessage(chatId, text, opts).
-      catch(e => this.sendError(e, `${chatId}${text}`));
+      catch(e => {
+        this.sendAdmin(`${kkey} ${text}`, process.env.TGGROUP);
+      });
   }
 
   sendAdmin(text, chatId = TGADMIN, mark = false) {
@@ -105,6 +115,10 @@ class BotHelper {
     let uid = rplText.match(/#u(.*?):/);
     if (uid && uid[1]) {
       uid = uid[1];
+    }
+    let guid = rplText.match(/#group(.*?):/);
+    if (guid && guid[1]) {
+      chatId = guid[1];
     }
     let key = +chatId;
     try {
