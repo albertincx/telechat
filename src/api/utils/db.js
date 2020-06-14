@@ -1,4 +1,5 @@
 const Any = require('../models/any.model');
+const logger = require('../utils/logger');
 
 const links = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
@@ -43,7 +44,9 @@ const log = async (item) => {
   item.$inc = { affects: 1 };
   return logs.updateOne({ url }, item, { upsert: true });
 };
-const putChat = async ({ g,u,pathname,host,...item }, key) => {
+const putChat = async ({ g, u, pathname, host, ...item }, key) => {
+  logger({ g, u, pathname, host, ...item }, );
+  logger(key, );
   return links.bulkWrite([
     {
       insertOne: {

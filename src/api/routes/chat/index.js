@@ -163,7 +163,7 @@ module.exports = (bot, botHelper) => {
       if (rpl.text === txtDocMessage) {
         document = msg.text;
       } else if (!document) {
-        await botHelper.sockSend(chatId, text);
+        await botHelper.sockSend(chatId, text, rpl.text);
         return;
       }
     }

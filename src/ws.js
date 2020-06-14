@@ -20,11 +20,17 @@ module.exports = (botHelper) => {
         messageObj = JSON.parse(message);
         let isUndef = false;
         if (!messageObj.uid) isUndef = true;
-        messageObj.uid = messageObj.uid || uid(5);
+        let uid1 = messageObj.uid || uid(5);
+        if (isUndef) {
+          uid1 = uid1.replace(/-/g, '');
+        }
+        messageObj.uid = uid1;
         if (messageObj.g) {
           let key = `${messageObj.g}`;
           if (!sockets.g[key]) {
-            const lastMess = await getLast(key, messageObj.uid);
+            let lastMess = [];
+            if (!messageObj.isRec) lastMess = await getLast(key,
+              messageObj.uid);
             sockets.g[key] = { ws, userId: messageObj.uid };
             if (isUndef || lastMess.length) {
               const service = { service: 'setUid', message: messageObj.uid };
@@ -33,7 +39,7 @@ module.exports = (botHelper) => {
             }
             ws.on('close', () => {
               botHelper.botMes(+messageObj.g * -1, `
-              #${messageObj.uid}: \n#disconnected`);
+              #u${messageObj.uid}: \n#disconnected`);
               delete sockets.g[key];
             });
           }
@@ -41,9 +47,9 @@ module.exports = (botHelper) => {
             await putChat(messageObj, key);
           }
           botHelper.botMes(+messageObj.g * -1, `
-          #${messageObj.uid}:\n${messageObj.message}`).catch(e => {
+          #u${messageObj.uid}:\n${messageObj.message}`).catch(e => {
             botHelper.botMes(process.env.TGGROUP, `
-          #${messageObj.uid}:\n${messageObj.message}`);
+          #u${messageObj.uid}:\n${messageObj.message}`);
           });
         }
       } catch (e) {

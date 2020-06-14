@@ -101,7 +101,11 @@ class BotHelper {
     this.db = false;
   }
 
-  async sockSend(chatId, txt) {
+  async sockSend(chatId, txt, rplText) {
+    let uid = rplText.match(/#u(.*?):/);
+    if (uid && uid[1]) {
+      uid = uid[1];
+    }
     let key = +chatId;
     try {
       if (key < 0) {
@@ -115,7 +119,7 @@ class BotHelper {
           this.sockets.u[key].ws.send(txt);
         }
       }
-      await putChat({ message: txt, sender: 'admin' }, key);
+      await putChat({ message: txt, sender: 'admin', uid }, key);
     } catch (e) {
       console.log(e);
     }
