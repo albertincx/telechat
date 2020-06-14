@@ -24,7 +24,7 @@ module.exports = (botHelper) => {
         if (messageObj.g) {
           let key = `${messageObj.g}`;
           if (!sockets.g[key]) {
-            const lastMess = await getLast(key,messageObj.uid);
+            const lastMess = await getLast(key, messageObj.uid);
             sockets.g[key] = { ws, userId: messageObj.uid };
             if (isUndef || lastMess.length) {
               const service = { service: 'setUid', message: messageObj.uid };
@@ -41,7 +41,10 @@ module.exports = (botHelper) => {
             await putChat(messageObj, key);
           }
           botHelper.botMes(+messageObj.g * -1, `
+          #${messageObj.uid}:\n${messageObj.message}`).catch(e => {
+            botHelper.botMes(process.env.TGGROUP, `
           #${messageObj.uid}:\n${messageObj.message}`);
+          });
         }
       } catch (e) {
         botHelper.sendAdmin(e);

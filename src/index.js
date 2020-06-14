@@ -14,8 +14,7 @@ if(process.env.FILESLAVE) {
   if (!NOBOT && process.env.TBTKN) {
     botInstance = require('./config/bot');
     if (botInstance) {
-      const { router, bot } = botroute(botInstance, conn);
-      bot.setBlacklist(blacklistFile);
+      const { bot } = botroute(botInstance, conn);
       require('./ws.js')(bot)
     }
   }

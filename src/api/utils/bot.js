@@ -25,15 +25,6 @@ class BotHelper {
     return chatId === TGADMIN;
   }
 
-  checkForce(txt) {
-    const m = txt.match(
-      /(pcache|content|custom|puppet|wget|cached)_force(.*?)$/);
-    if (m && m[1]) {
-      return m[1];
-    }
-    return false;
-  }
-
   botMes(chatId, text, mark = true) {
     let opts = {};
     if (mark) {
@@ -58,69 +49,6 @@ class BotHelper {
       text = `service: ${text}`;
     }
     return this.bot.sendMessage(chatId, text, opts);
-  }
-
-  sendAdminOpts(text, opts) {
-    const chatId = process.env.TGGROUPBUGS || TGADMIN;
-    return this.bot.sendMessage(chatId, text, opts);
-  }
-
-  sendAdminMark(text, chatId) {
-    return this.sendAdmin(text, chatId, true);
-  }
-
-  getParams(hostname, chatId, force) {
-    let params = {};
-    const contentSelector = force === 'content' ||
-      this.getConf(`${hostname}_content`);
-    if (contentSelector) {
-      params.content = contentSelector;
-    }
-    const puppetOnly = force === 'puppet' || this.getConf(`${hostname}_puppet`);
-    if (puppetOnly) {
-      params.isPuppet = true;
-    }
-    const customOnly = force === 'custom' || this.getConf(`${hostname}_custom`);
-    if (customOnly) {
-      params.isCustom = true;
-    }
-    const wget = force === 'wget' || this.getConf(`${hostname}_wget`);
-    if (wget) {
-      params.isWget = true;
-    }
-    const cached = force === 'cached' || this.getConf(`${hostname}_cached`);
-    if (cached) {
-      params.isCached = true;
-    }
-    const scroll = this.getConf(`${hostname}_scroll`);
-    if (scroll) {
-      params.scroll = scroll;
-    }
-    const noLinks = force === 'nolinks' || this.getConf(`${hostname}_nolinks`);
-    if (noLinks) {
-      params.noLinks = true;
-    }
-    const pcache = force === 'pcache';
-    if (pcache) {
-      params.isCached = true;
-      params.cachefile = 'puppet.html';
-      params.content = this.getConf('pcache_content');
-    }
-    if (this.isAdmin(chatId)) {
-      if (this.getConf('test_puppet')) {
-        params.isPuppet = true;
-      }
-      if (this.getConf('test_custom')) {
-        params.isCustom = true;
-      }
-    }
-    return params;
-  }
-
-  getConf(param) {
-    let c = this.config[param] || '';
-    if (c === _OFF) c = '';
-    return c;
   }
 
   togglecConfig(msg) {
@@ -171,18 +99,6 @@ class BotHelper {
 
   disDb() {
     this.db = false;
-  }
-
-  setBlacklist(f) {
-    this.bllist = fs.readFileSync(f).toString() || '';
-  }
-
-  isBlackListed(h) {
-    return this.bllist.match(h);
-  }
-
-  forward(mid, from, to) {
-    return this.bot.forwardMessage(to, from, mid);
   }
 
   async sockSend(chatId, txt) {
