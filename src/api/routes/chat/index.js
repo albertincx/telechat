@@ -59,7 +59,9 @@ const back = ({ reply }) => {
 
 const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
   const opts = {};
-  let text = messages.startEmpty();
+  let introtxt = '';
+  if(process.env.POST_LINK) introtxt = `\n Intro ${process.env.POST_LINK}`
+  let text = messages.startEmpty(introtxt);
   try {
     if (msg.update && msg.update.message) {
       let ID = '';
