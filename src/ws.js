@@ -42,9 +42,10 @@ module.exports = (botHelper) => {
           }
           if (!messageObj.login) {
             await putChat(messageObj, key);
-          }
-          botHelper.botMes(+messageObj.g * -1, `
+            botHelper.botMes(+messageObj.g * -1, `
           #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g);
+          }
+          
         }
       } catch (e) {
         botHelper.sendAdmin(e);
