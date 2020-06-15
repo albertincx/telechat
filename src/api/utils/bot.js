@@ -125,7 +125,7 @@ class BotHelper {
     try {
       if (key < 0) {
         key *= -1;
-        key = `${key}`;
+        key = `${key}_chat_${uid}`;
         if (this.sockets.g[key]) {
           this.sockets.g[key].ws.send(txt);
         }

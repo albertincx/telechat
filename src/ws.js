@@ -23,7 +23,7 @@ module.exports = (botHelper) => {
         }
         messageObj.uid = uid1;
         if (messageObj.g) {
-          let key = `${messageObj.g}`;
+          let key = `${messageObj.g}_chat_${messageObj.uid}`;
           if (!sockets.g[key]) {
             let lastMess = [];
             if (!messageObj.isRec) lastMess = await getLast(key,
