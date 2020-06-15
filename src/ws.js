@@ -35,8 +35,8 @@ module.exports = (botHelper) => {
               ws.send(JSON.stringify(service));
             }
             ws.on('close', () => {
-              botHelper.botMes(+messageObj.g * -1, `
-              #u${messageObj.uid}: \n#disconnected`);
+              // botHelper.botMes(+messageObj.g * -1, `
+              // #u${messageObj.uid}: \n#disconnected`);
               delete sockets.g[key];
             });
           }
