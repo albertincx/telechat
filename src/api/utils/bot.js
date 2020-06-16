@@ -134,7 +134,7 @@ class BotHelper {
           this.sockets.u[key].ws.send(txt);
         }
       }
-      await putChat({ message: txt, sender: 'admin', uid }, key);
+      await putChat({ message: txt, sender: 'admin', uid }, key).catch(() => {});
     } catch (e) {
       console.log(e);
     }

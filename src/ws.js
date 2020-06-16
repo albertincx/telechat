@@ -41,7 +41,7 @@ module.exports = (botHelper) => {
             });
           }
           if (!messageObj.login) {
-            await putChat(messageObj, key);
+            await putChat(messageObj, key).catch(() => {});
             botHelper.botMes(+messageObj.g * -1, `
           #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g);
           }
