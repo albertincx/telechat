@@ -44,14 +44,14 @@ const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
         }
         let codes = [];
         codes.push(
-          `<script src="//${process.env.APP_DOMAINNAME2}/app/chatbot?${par}=${ID}" async></script>
-<script type="text/javascript">window.instantChatBotUidName = 'userId'</script>`);
+          `<script src="//${process.env.APP_DOMAINNAME2}/start.html" async></script>
+<script type="text/javascript">window.__arsfChatIdg='${ID}';window.instantChatBotUidName = 'userId'</script>`);
         codes.push(' window.instantChatBotUidName = \'userId\';'
-          + 'var newScript = document.createElement(\'script\');'
+          + `window.__arsfChatIdg='${ID}';` + 'var newScript = document.createElement(\'script\');'
           + 'newScript.type = \'text/javascript\';'
           +
           'newScript.src = \'' +
-          `//${process.env.APP_DOMAINNAME2}/app/chatbot?${par}=${ID}` + '\';'
+          `//${process.env.APP_DOMAINNAME2}//start.html` + '\';'
           +
           'document.getElementsByTagName("head")[0].appendChild(newScript);');
         text = messages.startCode(codes) + `\n\n instantChatBotUidName - unique user id`;
