@@ -112,6 +112,7 @@ class BotHelper {
   }
 
   async sockSend(chatId, txt, rplText) {
+    if(!rplText) return;
     let uid = rplText.match(/#u(.*?):/);
     if (uid && uid[1]) {
       uid = uid[1];
