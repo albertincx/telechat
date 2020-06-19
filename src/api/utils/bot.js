@@ -110,7 +110,9 @@ class BotHelper {
   disDb() {
     this.db = false;
   }
-
+  forward(mid, from, to) {
+    return this.bot.forwardMessage(to, from, mid);
+  }
   async sockSend(chatId, txt, rplText) {
     if(!rplText) return;
     let uid = rplText.match(/#u(.*?):/);

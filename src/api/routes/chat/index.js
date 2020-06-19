@@ -30,8 +30,10 @@ const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
   let introtxt = '';
   if(process.env.POST_LINK) introtxt = `\n Intro ${process.env.POST_LINK}`
   let text = messages.startEmpty(introtxt);
+  let isStartMessage = true;
   try {
     if (msg.update && msg.update.message) {
+      
       let ID = '';
       const str = msg.update.message.text.match('-?[0-9]+');
       if (str && str[0]) {
@@ -54,8 +56,10 @@ const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
           'document.getElementsByTagName("head")[0].appendChild(newScript);');
         text = messages.startCode(codes) + `\n\n instantChatBotUidName - unique user id`;
         opts.parse_mode = 'Markdown';
+        isStartMessage = false;
       } else {
         if (msg.update.message.chat.id < 0) {
+          isStartMessage = false;
           text = messages.start(username, msg.update.message.chat.id);
         }
       }
@@ -63,8 +67,12 @@ const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
   } catch (e) {
     console.log(e);
   }
-
-  reply(text, opts).catch((e) => console.log(e));
+  if(isStartMessage){
+    botHelper.forward(2, -1001487355894, message.from.id);
+  } else {
+    reply(text, opts).catch((e) => console.log(e));  
+  }
+  
   botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
 };
 const createIv = ({ reply }) => {
