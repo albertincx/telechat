@@ -28,19 +28,16 @@ function cron(crontime, tasks, botHelper) {
 }
 
 function init(botHelper) {
-  const crontime = process.env.NODE_CRON || '';
+  const crontime = process.env.NODE_CRON || '5';
   const crontasks = process.env.CRON_TASKS || '';
 
   const crons = crontime.split(CRON_SEP);
   const tasks = crontasks.split(CRON_SEP);
 
   try {
-    console.log(tasks);
     if (crons && crons.length) {
       for (let i = 0; i < crons.length; i += 1) {
-        let crontime = `${crons[i]}`.trim().
-          replace(/G/g, '*').
-          replace(/d/g, '/');
+        let crontime = `0 */${crons[i]} * * * *`.trim();
         if (crontime && tasks[i]) {
           const jobs = tasks[i].split(JOB_SEP);
           if (jobs && jobs.length) {

@@ -3,6 +3,8 @@ const logger = require('../utils/logger');
 
 const links = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
+const uids = Any.collection.conn.model(
+  process.env.MONGO_COLL_LINKS || 'uids', Any.schema);
 const logs = Any.collection.conn.model(process.env.MONGO_COLL_LOGS || 'logs',
   Any.schema);
 
@@ -45,8 +47,6 @@ const log = async (item) => {
   return logs.updateOne({ url }, item, { upsert: true });
 };
 const putChat = async ({ g, u, pathname, host, ...item }, key) => {
-  logger({ g, u, pathname, host, ...item }, );
-  logger(key, );
   return links.bulkWrite([
     {
       insertOne: {
@@ -55,10 +55,29 @@ const putChat = async ({ g, u, pathname, host, ...item }, key) => {
     },
   ]);
 };
+
+const getUidUser = async (g, key) => {
+  g = `${g}`;
+  const last = await uids.findOne({ key, g });
+  return last ? last.toObject() : null;
+};
+
+const putUidUser = async ({ g, u, ...item }, key) => {
+  return uids.bulkWrite([
+    {
+      updateOne: {
+        filter: { g, key },
+        update: { g, key, u, ...item },
+        upsert: true,
+      },
+    }]);
+};
 module.exports.stat = stat;
 module.exports.clear = clear;
 module.exports.updateOne = updateOne;
 module.exports.get = get;
 module.exports.getLast = getLast;
 module.exports.putChat = putChat;
+module.exports.putUidUser = putUidUser;
+module.exports.getUidUser = getUidUser;
 module.exports.log = log;

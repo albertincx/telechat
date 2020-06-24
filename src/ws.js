@@ -16,7 +16,6 @@ module.exports = (botHelper) => {
       let messageObj = {};
       try {
         messageObj = JSON.parse(message);
-        logger(messageObj)
         let isUndef = false;
         if (!messageObj.uid) isUndef = true;
         let uid1 = messageObj.uid || uid(5);

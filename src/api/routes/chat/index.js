@@ -1,11 +1,6 @@
-const url = require('url');
 const messages = require('../../../messages/format');
 const keyboards = require('./keyboards');
 const buttons = require('../../../config/buttons');
-
-const logger = require('../../utils/logger');
-const { log } = require('../../utils/db');
-const { validRegex } = require('../../../config/config.json');
 
 const FILESLAVE = process.env.FILESLAVE;
 let username = process.env.TBTUSERNAME;
@@ -25,37 +20,21 @@ const back = ({ reply }) => {
   reply(messages.menu(), keyboards.start()).catch(() => {});
 };
 
-const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
+const startOrHelp = async ({ reply, message, ...msg }, botHelper) => {
   const opts = {};
   let introtxt = '';
-  if(process.env.POST_LINK) introtxt = `\n Intro ${process.env.POST_LINK}`
+  if (process.env.POST_LINK) introtxt = `\n Intro ${process.env.POST_LINK}`;
   let text = messages.startEmpty(introtxt);
   let isStartMessage = true;
   try {
     if (msg.update && msg.update.message) {
-      
-      let ID = '';
-      const str = msg.update.message.text.match('-?[0-9]+');
-      if (str && str[0]) {
-        ID = +str[0];
-        let par = 'g';
-        if (ID > 0) par = 'u'; else {
-          ID *= -1;
+      const result = await botHelper.processUpdateMessage(
+        msg.update.message);
+      if (result.text) {
+        text = result.text;
+        if (result.mode) {
+          opts.parse_mode = result.mode;
         }
-        let codes = [];
-        codes.push(
-          `<script src="//${process.env.APP_DOMAINNAME2}/start.js" async></script>
-<script type="text/javascript">window.__arsfChatIdg='${ID}';window.instantChatBotUidName = 'userId'</script>`);
-        codes.push(' window.instantChatBotUidName = \'userId\';'
-          + `window.__arsfChatIdg='${ID}';` + 'var newScript = document.createElement(\'script\');'
-          + 'newScript.type = \'text/javascript\';'
-          +
-          'newScript.src = \'' +
-          `//${process.env.APP_DOMAINNAME2}/start.js` + '\';'
-          +
-          'document.getElementsByTagName("head")[0].appendChild(newScript);');
-        text = messages.startCode(codes) + `\n\n instantChatBotUidName - unique user id`;
-        opts.parse_mode = 'Markdown';
         isStartMessage = false;
       } else {
         if (msg.update.message.chat.id < 0) {
@@ -67,14 +46,14 @@ const startOrHelp = ({ reply, message, ...msg }, botHelper) => {
   } catch (e) {
     console.log(e);
   }
-  if(isStartMessage){
-    botHelper.forward(2, -1001487355894, message.from.id);
+  if (isStartMessage) {
+    botHelper.forward(2, -1001487355894, message.from.id).catch(console.log);
+    botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
   } else {
-    reply(text, opts).catch((e) => console.log(e));  
+    reply(text, opts).catch((e) => console.log(e));
   }
-  
-  botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
 };
+
 const createIv = ({ reply }) => {
   reply(messages.createIv(), keyboards.createIv()).catch(() => {});
 };
@@ -87,7 +66,8 @@ const createIvTxt = ({ reply }) => {
 };
 
 module.exports = (bot, botHelper) => {
-  bot.command(['/start', buttons.help.command], ctx => startOrHelp(ctx, botHelper));
+  bot.command(['/start', buttons.help.command],
+    ctx => startOrHelp(ctx, botHelper));
   bot.hears(buttons.help.label, startOrHelp);
   bot.hears(buttons.back.label, back);
   bot.hears(buttons.support.label, support);
@@ -100,12 +80,7 @@ module.exports = (bot, botHelper) => {
   bot.action(/.*/, async (ctx) => {
     const [data] = ctx.match;
     const s = data === 'no_img';
-    if (s) {
-      const { message } = ctx.update.callback_query;
-      const { message_id, chat, entities } = message;
-      const rabbitMes = { message_id, chatId: chat.id, link: entities[1].url };
-      return;
-    }
+    if (s) return;
     const resolveDataMatch = data.match(/^r_([0-9]+)_([0-9]+)/);
     if (resolveDataMatch) {
       let [, msgId, userId] = resolveDataMatch;
@@ -125,12 +100,8 @@ module.exports = (bot, botHelper) => {
   });
 
   const addToQueue = async ({ message: msg, reply }) => {
-    if (FILESLAVE) {
-      return;
-    }
-    logger(msg);
-
-    let { reply_to_message,  } = msg;
+    if (FILESLAVE) return;
+    let { reply_to_message } = msg;
     let document = msg.document;
     let rpl = reply_to_message;
     if (!document && rpl) document = rpl.document;
