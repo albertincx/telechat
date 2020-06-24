@@ -21,7 +21,9 @@ const back = ({ reply }) => {
 };
 
 const startOrHelp = async ({ reply, message, ...msg }, botHelper) => {
-  const opts = {};
+  const opts = {
+    disable_web_page_preview: true
+  };
   let introtxt = '';
   if (process.env.POST_LINK) introtxt = `\n Intro ${process.env.POST_LINK}`;
   let text = messages.startEmpty(introtxt);
