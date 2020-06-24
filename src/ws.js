@@ -1,7 +1,8 @@
 const WebSocket = require('ws');
 var uid = require('uid-safe').sync;
 const { putChat, getLast } = require('./api/utils/db');
-const { NOBOT, PORT, blacklistFile } = require('./config/vars');
+const logger = require('./api/utils/logger');
+const { PORT } = require('./config/vars');
 const sockets = { g: {}, u: {} };
 module.exports = (botHelper) => {
   botHelper.setSockets(sockets);
@@ -15,6 +16,7 @@ module.exports = (botHelper) => {
       let messageObj = {};
       try {
         messageObj = JSON.parse(message);
+        logger(messageObj)
         let isUndef = false;
         if (!messageObj.uid) isUndef = true;
         let uid1 = messageObj.uid || uid(5);
@@ -45,7 +47,6 @@ module.exports = (botHelper) => {
             botHelper.botMes(+messageObj.g * -1, `
           #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g, false);
           }
-          
         }
       } catch (e) {
         botHelper.sendAdmin(e);

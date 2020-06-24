@@ -138,7 +138,6 @@ module.exports = (bot, botHelper) => {
     let { text } = msg;
     if (rpl) {
       if (rpl.text === txtDocMessage) {
-        document = msg.text;
       } else if (!document) {
         await botHelper.sockSend(chatId, text, rpl.text);
         return;
