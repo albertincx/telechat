@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 async function run(params, botHelper) {
   try {
     let url = process.env.TEST_API;
