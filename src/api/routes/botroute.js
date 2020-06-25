@@ -39,7 +39,11 @@ module.exports = (bot, conn) => {
       db.stat().then(r => reply(r));
     }
   });
-
+  bot.command('statuids', ({ message, reply }) => {
+    if (botHelper.isAdmin(message.chat.id)) {
+      db.stat('uids').then(r => reply(r));
+    }
+  });
   bot.command('cleardb', ({ message, reply }) => {
     if (botHelper.isAdmin(message.chat.id)) {
       return db.clear(message).then(r => reply(r));

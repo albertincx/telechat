@@ -7,15 +7,19 @@ const uids = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'uids', Any.schema);
 const logs = Any.collection.conn.model(process.env.MONGO_COLL_LOGS || 'logs',
   Any.schema);
-
-const stat = async () => {
-  const cnt = await links.countDocuments();
-  return cnt;
-};
 const statUids = async () => {
   const cnt = await uids.countDocuments();
   return cnt;
 };
+const stat = async (coll = '') => {
+  if(coll==='uids'){
+    const cnt = await statUids();
+  return cnt;
+  }
+  const cnt = await links.countDocuments();
+  return cnt;
+};
+
 const clear = async (msg) => {
   let search = msg.text.replace('/cleardb', '').trim();
   search = `${search}`.trim();
