@@ -12,7 +12,10 @@ const stat = async () => {
   const cnt = await links.countDocuments();
   return cnt;
 };
-
+const statUids = async () => {
+  const cnt = await uids.countDocuments();
+  return cnt;
+};
 const clear = async (msg) => {
   let search = msg.text.replace('/cleardb', '').trim();
   search = `${search}`.trim();
