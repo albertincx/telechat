@@ -25,6 +25,14 @@ module.exports = (botHelper) => {
         messageObj.uid = uid1;
         if (messageObj.g) {
           let key = `${messageObj.g}_chat_${messageObj.uid}`;
+          if (messageObj.service === 'lastmes') {
+            let lastMess = await getLast(key,
+              messageObj.uid);
+            const service = { service: 'lastmes', message: messageObj.uid };
+            service.lastMess = lastMess;
+            ws.send(JSON.stringify(service));
+            return;
+          }
           if (!sockets.g[key]) {
             let lastMess = [];
             if (!messageObj.isRec) lastMess = await getLast(key,
@@ -32,7 +40,7 @@ module.exports = (botHelper) => {
             sockets.g[key] = { ws, userId: messageObj.uid };
             if (isUndef || lastMess.length) {
               const service = { service: 'setUid', message: messageObj.uid };
-              service.lastMess = lastMess;
+              // service.lastMess = lastMess;
               ws.send(JSON.stringify(service));
             }
             ws.on('close', () => {
