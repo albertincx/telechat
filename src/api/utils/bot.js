@@ -17,7 +17,7 @@ function setHours(date, hours, minus = true) {
 }
 
 function includeScriptInline(ID) {
-  return 'window.instantChatBotUidName = \'userId\';'
+  return ' window.instantChatBotUidName = \'userId\';'
     + `window.__arsfChatIdg='${ID}';` +
     'var newScript = document.createElement(\'script\');'
     + 'newScript.type = \'text/javascript\';'
@@ -29,8 +29,9 @@ function includeScriptInline(ID) {
 }
 
 function includeScript(ID) {
-  return `<script src="//${process.env.APP_DOMAINNAME2}/start.js" async></script>
-<script type="text/javascript">window.__arsfChatIdg='${ID}';window.instantChatBotUidName = 'userId'</script>`;
+  return ` <script src="//${process.env.APP_DOMAINNAME2}/start.js" async></script>
+<script type="text/`+`javascript">window.__arsfChatIdg='${ID}';
+window.instantChatBotUidName = 'userId'</script>`;
 }
 
 class BotHelper {
