@@ -14,6 +14,7 @@ module.exports = (botHelper) => {
   wss.on('connection', ws => {
     ws.on('message', async message => {
       let messageObj = {};
+      console.log(message);
       try {
         messageObj = JSON.parse(message);
         let isUndef = false;
@@ -30,6 +31,7 @@ module.exports = (botHelper) => {
               messageObj.uid);
             const service = { service: 'lastmes', message: messageObj.uid };
             service.lastMess = lastMess;
+            console.log(lastMess);
             ws.send(JSON.stringify(service));
             return;
           }
