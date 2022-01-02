@@ -1,7 +1,6 @@
 const WebSocket = require('ws');
 var uid = require('uid-safe').sync;
 const { putChat, getLast } = require('./api/utils/db');
-const logger = require('./api/utils/logger');
 const { PORT } = require('./config/vars');
 const sockets = { g: {}, u: {} };
 module.exports = (botHelper) => {

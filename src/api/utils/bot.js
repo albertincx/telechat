@@ -18,7 +18,7 @@ function setHours(date, hours, minus = true) {
 
 function includeScriptInline(ID) {
   return ' window.instantChatBotUidName = \'userId\';'
-    + `window.__arsfChatIdg='${ID}';` +
+    + `window.__arsfChatIdg='${ID}';window.__arsfChatUrl = 'api.cafechat.app';` +
     'var newScript = document.createElement(\'script\');'
     + 'newScript.type = \'text/javascript\';'
     +
@@ -30,7 +30,7 @@ function includeScriptInline(ID) {
 
 function includeScript(ID) {
   return ` <script src="//${process.env.APP_DOMAINNAME2}/start.js" async></script>
-<script type="text/`+`javascript">window.__arsfChatIdg='${ID}';
+<script type="text/`+`javascript">window.__arsfChatIdg='${ID}';window.__arsfChatUrl = 'api.cafechat.app';
 window.instantChatBotUidName = 'userId'</script>`;
 }
 
