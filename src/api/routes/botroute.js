@@ -6,7 +6,7 @@ const db = require('../utils/db');
 
 const router = express.Router();
 const filepath = 'count.txt';
-if (!fs.existsSync(filepath)) fs.writeFileSync(filepath, 0);
+if (!fs.existsSync(filepath)) fs.writeFileSync(filepath, '0');
 
 let startCnt = parseInt(fs.readFileSync('count.txt'), 10);
 module.exports = (bot, conn) => {
@@ -64,6 +64,6 @@ module.exports = (bot, conn) => {
   }
   startCnt += 1;
   if (startCnt >= 500) startCnt = 0;
-  fs.writeFileSync(filepath, startCnt);
+  fs.writeFileSync(filepath, `${startCnt}`);
   return { router, bot: botHelper };
 };
