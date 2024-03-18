@@ -1,12 +1,14 @@
 const Any = require('../models/any.model');
-const logger = require('../utils/logger');
 
 const links = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
+
 const uids = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'uids', Any.schema);
+
 const logs = Any.collection.conn.model(process.env.MONGO_COLL_LOGS || 'logs',
   Any.schema);
+
 const statUids = async () => {
   const cnt = await uids.countDocuments();
   return cnt;
@@ -30,10 +32,10 @@ const clear = async (msg) => {
   const d = await links.deleteMany({ url: s });
   return JSON.stringify(d);
 };
-const getLast = async (key, uid) => {
-  const last = await links.find({ key, uid }).sort({ createdAt: -1 }).limit(20);
-  return last;
-};
+
+const getLast = (key, uid) => links.find({ key, uid }).sort(
+    { createdAt: -1 }).limit(20);
+
 const get = async (url) => {
   const me = await links.findOne({ url });
   if (me) {
@@ -48,11 +50,13 @@ const updateOne = async (item) => {
   item.$inc = { affects: 1 };
   return links.updateOne({ url }, item, { upsert: true });
 };
+
 const log = async (item) => {
   const { url } = item;
   item.$inc = { affects: 1 };
   return logs.updateOne({ url }, item, { upsert: true });
 };
+
 const putChat = async ({ g, u, pathname, host, ...item }, key) => {
   return links.bulkWrite([
     {

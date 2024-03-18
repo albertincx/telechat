@@ -50,7 +50,7 @@ const startOrHelp = async ({ reply, message, ...msg }, botHelper) => {
   }
   if (isStartMessage) {
     botHelper.forward(2, -1001487355894, message.from.id).catch(console.log);
-    botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
+    botHelper.sendAdmin({text: `${JSON.stringify(message.from)}`});
   } else {
     reply(text, opts).catch((e) => console.log(e));
   }
@@ -101,7 +101,7 @@ module.exports = (bot, botHelper) => {
     }
   });
 
-  const addToQueue = async ({ message: msg, reply }) => {
+  const onMessage = async ({ message: msg, reply }) => {
     if (FILESLAVE) return;
     let { reply_to_message } = msg;
     let document = msg.document;
@@ -125,9 +125,9 @@ module.exports = (bot, botHelper) => {
         await reply(messages.start(username, chatId)).catch(
           () => {});
       }
-      botHelper.sendAdmin(`support ${s}${JSON.stringify(msg)}`);
+      botHelper.sendAdmin({text: `support ${s}${JSON.stringify(msg)}`});
     }
   };
-  bot.hears(/.*/, (ctx) => addToQueue(ctx));
-  bot.on('message', ({ update, reply }) => addToQueue({ ...update, reply }));
+  bot.hears(/.*/, (ctx) => onMessage(ctx));
+  bot.on('message', ({ update, reply }) => onMessage({ ...update, reply }));
 };

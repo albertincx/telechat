@@ -39,11 +39,13 @@ module.exports = (bot, conn) => {
       db.stat().then(r => reply(r));
     }
   });
+
   bot.command('statuids', ({ message, reply }) => {
     if (botHelper.isAdmin(message.chat.id)) {
       db.stat('uids').then(r => reply(r));
     }
   });
+
   bot.command('cleardb', ({ message, reply }) => {
     if (botHelper.isAdmin(message.chat.id)) {
       return db.clear(message).then(r => reply(r));
@@ -52,15 +54,16 @@ module.exports = (bot, conn) => {
 
   bot.command('srv', ({ message }) => {
     if (botHelper.isAdmin(message.from.id)) {
-      botHelper.sendAdmin(`srv: ${JSON.stringify(message)}`);
+      botHelper.sendAdmin({text: `srv: ${JSON.stringify(message)}`});
     }
   });
 
   format(bot, botHelper);
+
   bot.launch();
 
   if ((startCnt % 10) === 0 || process.env.DEV) {
-    botHelper.sendAdmin(`started ${startCnt} times`);
+    botHelper.sendAdmin({text: `started ${startCnt} times`});
   }
   startCnt += 1;
   if (startCnt >= 500) startCnt = 0;

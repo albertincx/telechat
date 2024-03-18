@@ -1,7 +1,10 @@
 const WebSocket = require('ws');
 var uid = require('uid-safe').sync;
+const fs = require('fs');
+
 const { putChat, getLast } = require('./api/utils/db');
 const { PORT } = require('./config/vars');
+
 const sockets = { g: {}, u: {} };
 module.exports = (botHelper) => {
   botHelper.setSockets(sockets);
@@ -13,7 +16,6 @@ module.exports = (botHelper) => {
   wss.on('connection', ws => {
     ws.on('message', async message => {
       let messageObj = {};
-      console.log(message);
       try {
         messageObj = JSON.parse(message);
         let isUndef = false;
@@ -23,14 +25,20 @@ module.exports = (botHelper) => {
           uid1 = uid1.replace(/-/g, '');
         }
         messageObj.uid = uid1;
+
         if (messageObj.g) {
-          let key = `${messageObj.g}_chat_${messageObj.uid}`;
+          const key = `${messageObj.g}_chat_${messageObj.uid}`;
           if (messageObj.service === 'lastmes') {
-            let lastMess = await getLast(key,
-              messageObj.uid);
+            let result = [];
+            try {
+              const lastMess = await getLast(key, messageObj.uid);
+              if (lastMess) result = lastMess;
+            } catch (e) {
+              console.log(e);
+            }
             const service = { service: 'lastmes', message: messageObj.uid };
-            service.lastMess = lastMess;
-            console.log(lastMess);
+            service.lastMess = result;
+
             ws.send(JSON.stringify(service));
             return;
           }
@@ -41,23 +49,35 @@ module.exports = (botHelper) => {
             sockets.g[key] = { ws, userId: messageObj.uid };
             if (isUndef || lastMess.length) {
               const service = { service: 'setUid', message: messageObj.uid };
-              // service.lastMess = lastMess;
               ws.send(JSON.stringify(service));
             }
             ws.on('close', () => {
-              // botHelper.botMes(+messageObj.g * -1, `
-              // #u${messageObj.uid}: \n#disconnected`);
               delete sockets.g[key];
             });
           }
+          const CHAT_ID = +messageObj.g * -1;
+
+          if (messageObj.img) {
+            const filePath = `./${new Date().getTime()}`;
+            const base64Data = messageObj.img.replace(/^data:([A-Za-z-+/]+);base64,/, '');
+
+            fs.writeFile(filePath, base64Data, 'base64', () => {
+              botHelper.sendPhot(CHAT_ID, { source: fs.readFileSync(filePath) }, 'test').then(()=>{
+                fs.unlinkSync(filePath);
+              });
+            });
+            return;
+          }
           if (!messageObj.login) {
-            await putChat(messageObj, key).catch(() => {});
-            botHelper.botMes(+messageObj.g * -1, `
+            await putChat(messageObj, key).catch((e) => {
+              console.log(e);
+            });
+            botHelper.botMes(CHAT_ID, `
           #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g, false);
           }
         }
       } catch (e) {
-        botHelper.sendAdmin(e);
+        botHelper.sendAdmin({ text: `${e}` });
       }
     });
   });

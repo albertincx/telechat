@@ -57,11 +57,7 @@ class BotHelper {
     return chatId === TGADMIN;
   }
 
-  botMes(chatId, text, key, mark = false) {
-    let opts = {};
-    if (mark) {
-      opts = { parse_mode: 'Markdown' };
-    }
+  getKey(key) {
     let kkey = '';
     if (key) {
       key = +key;
@@ -70,17 +66,32 @@ class BotHelper {
       }
       kkey = `#group-${key}:`;
     }
+    return kkey;
+  }
+
+  sendPhot(chatId, fileObj, text, key) {
+    return this.bot.sendPhoto(chatId, fileObj, {caption: text}).
+    catch(() => {
+      return this.sendAdmin({text: `${this.getKey(key)} ${text}`, fileObj});
+    });
+  }
+
+  botMes(chatId, text, key, mark = false) {
+    let opts = {};
+    if (mark) {
+      opts = { parse_mode: 'Markdown' };
+    }
+
     return this.bot.sendMessage(chatId, text, opts).
-      catch(e => {
-        this.sendAdmin(`${kkey} ${text}`, process.env.TGGROUP);
+      catch(() => {
+        this.sendAdmin({text: `${this.getKey(key)} ${text}`}, process.env.TGGROUP);
       });
   }
 
   clearUnusedChats() {
     let chats = Object.keys(this.socketsLocal);
     let now = new Date();
-    let hour = 1;
-    hour = 0.1;
+    let hour = 0.1;
     for (let i = 0; i < chats.length; i += 1) {
       let skId = chats[i];
       let now1 = setHours(this.socketsLocal[skId].createdAt, hour, false);
@@ -93,7 +104,7 @@ class BotHelper {
     }
   }
 
-  sendAdmin(text, chatId = TGADMIN, mark = false) {
+  sendAdmin({ text, fileObj }, chatId = TGADMIN, mark = false) {
     let opts = {};
     if (mark) {
       opts = {
@@ -107,7 +118,14 @@ class BotHelper {
     if (chatId === TGADMIN) {
       text = `service: ${text}`;
     }
+    if (fileObj) {
+      return this.bot.sendPhoto(chatId, fileObj, {caption: text}).catch(() => {});
+    }
     return this.bot.sendMessage(chatId, text, opts);
+  }
+
+  disDb() {
+    this.db = false;
   }
 
   togglecConfig(msg) {
@@ -149,10 +167,6 @@ class BotHelper {
     this.config[param] = content;
     fs.writeFileSync('.conf/config.json', JSON.stringify(this.config));
     return this.botMes(TGADMIN, content);
-  }
-
-  disDb() {
-    this.db = false;
   }
 
   forward(mid, from, to) {
