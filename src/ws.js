@@ -62,7 +62,8 @@ module.exports = (botHelper) => {
             const base64Data = messageObj.img.replace(/^data:([A-Za-z-+/]+);base64,/, '');
 
             fs.writeFile(filePath, base64Data, 'base64', () => {
-              botHelper.sendPhot(CHAT_ID, { source: fs.readFileSync(filePath) }, 'test').then(()=>{
+              botHelper.sendPhot(CHAT_ID, { source: fs.readFileSync(filePath) }, `
+          #u${messageObj.uid}:\nScreen shot`).then(()=>{
                 fs.unlinkSync(filePath);
               });
             });
