@@ -9,9 +9,8 @@ const sockets = { g: {}, u: {} };
 module.exports = (botHelper) => {
   botHelper.setSockets(sockets);
   const wss = new WebSocket.Server({ port: PORT });
-  global.arsfChatSocket = (process.env.APP_DOMAINNAME
-    ? process.env.APP_DOMAINNAME
-    : 'localhost') + ':' + PORT;
+  const domainName = process.env.APP_DOMAINNAME || 'localhost';
+  global.arsfChatSocket = domainName + ':' + PORT;
 
   wss.on('connection', ws => {
     ws.on('message', async message => {
@@ -58,6 +57,11 @@ module.exports = (botHelper) => {
           const CHAT_ID = +messageObj.g * -1;
 
           if (messageObj.img) {
+            if (messageObj.message === 'logs') {
+              botHelper.botMes(CHAT_ID, `
+          #u${messageObj.uid}:\n${messageObj.message} \n${messageObj.img}`, messageObj.g);
+              return;
+            }
             const filePath = `./${new Date().getTime()}`;
             const base64Data = messageObj.img.replace(/^data:([A-Za-z-+/]+);base64,/, '');
 
@@ -74,7 +78,7 @@ module.exports = (botHelper) => {
               console.log(e);
             });
             botHelper.botMes(CHAT_ID, `
-          #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g, false);
+          #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g);
           }
         }
       } catch (e) {
