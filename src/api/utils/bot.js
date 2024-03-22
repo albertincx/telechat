@@ -280,9 +280,11 @@ class BotHelper {
       uid = uid[1];
     }
     let guid = rplText.match(/#group(.*?):/);
+
     if (guid && guid[1]) {
       chatId = guid[1];
     }
+    chatId = `${chatId}`.replace('--','-');
     let key = +chatId;
     try {
       if (key < 0) {
