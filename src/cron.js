@@ -10,6 +10,7 @@ function cron(crontime, tasks, botHelper) {
     if (process.env.DEV) {
       const d = new Date();
       console.log(`created task ${crontime} `, d);
+      botHelper.broadCast();
     }
     for (let i = 0; i < tasks.length; i += 1) {
       const taskName = tasks[i];
@@ -29,7 +30,7 @@ function cron(crontime, tasks, botHelper) {
   job.start();
 }
 
-function init(botHelper) {
+function initCron(botHelper) {
   const crontime = process.env.NODE_CRON || '5';
   const crontasks = process.env.CRON_TASKS || '';
 
@@ -70,4 +71,4 @@ function init(botHelper) {
   }
 }
 
-module.exports = init;
+module.exports = initCron;

@@ -2,7 +2,6 @@ const messages = require('../../../messages/format');
 const keyboards = require('./keyboards');
 const buttons = require('../../../config/buttons');
 
-const FILESLAVE = process.env.FILESLAVE;
 let username = process.env.TBTUSERNAME;
 
 const support = ({ reply }) => {
@@ -102,7 +101,6 @@ module.exports = (bot, botHelper) => {
   });
 
   const onMessage = async ({ message: msg, reply }) => {
-    if (FILESLAVE) return;
     let { reply_to_message } = msg;
     let document = msg.document;
     let rpl = reply_to_message;

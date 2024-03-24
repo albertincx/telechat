@@ -1,4 +1,5 @@
 const Any = require('../models/any.model');
+const { NODB } = require('../../config/vars');
 
 const links = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
@@ -33,7 +34,7 @@ const clear = async (msg) => {
   return JSON.stringify(d);
 };
 
-const getLast = (key, uid) => links.find({ key, uid }).sort(
+const getLast = (key, uid) => !NODB && links.find({ key, uid }).sort(
     { createdAt: -1 }).limit(20);
 
 const get = async (url) => {
@@ -58,7 +59,7 @@ const log = async (item) => {
 };
 
 const putChat = async ({ g, u, pathname, host, ...item }, key) => {
-  return links.bulkWrite([
+  return !NODB && links.bulkWrite([
     {
       insertOne: {
         document: { key, ...item },

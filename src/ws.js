@@ -4,10 +4,15 @@ const fs = require('fs');
 
 const { putChat, getLast } = require('./api/utils/db');
 const { PORT } = require('./config/vars');
+const logger = require("./api/utils/logger");
 
 const sockets = { g: {}, u: {} };
-module.exports = (botHelper) => {
-  botHelper.setSockets(sockets);
+
+const getMessage = (messageObj) => `
+          #u${messageObj.uid}:\n${messageObj.message}`;
+
+const initWs = (botHelper) => {
+  botHelper && botHelper.setSockets(sockets);
   const wss = new WebSocket.Server({ port: PORT });
   const domainName = process.env.APP_DOMAINNAME || 'localhost';
   global.arsfChatSocket = domainName + ':' + PORT;
@@ -24,6 +29,7 @@ module.exports = (botHelper) => {
           uid1 = uid1.replace(/-/g, '');
         }
         messageObj.uid = uid1;
+        logger(messageObj.uid, messageObj.message);
 
         if (messageObj.g) {
           const key = `${messageObj.g}_chat_${messageObj.uid}`;
@@ -33,18 +39,19 @@ module.exports = (botHelper) => {
               const lastMess = await getLast(key, messageObj.uid);
               if (lastMess) result = lastMess;
             } catch (e) {
-              console.log(e);
+              logger(e);
             }
             const service = { service: 'lastmes', message: messageObj.uid };
             service.lastMess = result;
-
+            logger('lastMess', result.length);
             ws.send(JSON.stringify(service));
             return;
           }
           if (!sockets.g[key]) {
             let lastMess = [];
-            if (!messageObj.isRec) lastMess = await getLast(key,
-              messageObj.uid);
+            if (!messageObj.isRec) {
+              lastMess = await getLast(key, messageObj.uid);
+            }
             sockets.g[key] = { ws, userId: messageObj.uid };
             if (isUndef || lastMess.length) {
               const service = { service: 'setUid', message: messageObj.uid };
@@ -58,16 +65,16 @@ module.exports = (botHelper) => {
 
           if (messageObj.img) {
             if (messageObj.message === 'logs') {
-              botHelper.botMes(CHAT_ID, `
-          #u${messageObj.uid}:\n${messageObj.message} \n${messageObj.img}`, messageObj.g);
+              messageObj.message = messageObj.img;
+              botHelper.botMes(CHAT_ID, getMessage(messageObj), messageObj.g);
               return;
             }
             const filePath = `./${new Date().getTime()}`;
             const base64Data = messageObj.img.replace(/^data:([A-Za-z-+/]+);base64,/, '');
 
             fs.writeFile(filePath, base64Data, 'base64', () => {
-              botHelper.sendPhot(CHAT_ID, { source: fs.readFileSync(filePath) }, `
-          #u${messageObj.uid}:\nScreen shot`).then(()=>{
+              messageObj.message = 'Screen shot';
+              botHelper.sendPhot(CHAT_ID, { source: fs.readFileSync(filePath) }, getMessage(messageObj)).then(()=>{
                 fs.unlinkSync(filePath);
               });
             });
@@ -75,15 +82,17 @@ module.exports = (botHelper) => {
           }
           if (!messageObj.login) {
             await putChat(messageObj, key).catch((e) => {
-              console.log(e);
+              logger(e);
             });
-            botHelper.botMes(CHAT_ID, `
-          #u${messageObj.uid}:\n${messageObj.message}`, messageObj.g);
+            botHelper.botMes(CHAT_ID, getMessage(messageObj), messageObj.g);
           }
         }
       } catch (e) {
+        logger(e)
         botHelper.sendAdmin({ text: `${e}` });
       }
     });
   });
 };
+
+module.exports = initWs;

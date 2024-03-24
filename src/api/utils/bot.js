@@ -2,6 +2,7 @@ const fs = require('fs');
 var uid = require('uid-safe').sync;
 const { putChat, putUidUser, getUidUser } = require('../utils/db');
 const messages = require('../../messages/format');
+const logger = require("./logger");
 const TGADMIN = parseInt(process.env.TGADMIN);
 const _OFF = 'Off';
 const _ON = 'On';
@@ -77,6 +78,8 @@ class BotHelper {
   }
 
   botMes(chatId, text, key, mark = false) {
+    if (!this.bot) return;
+
     let opts = {};
     if (mark) {
       opts = { parse_mode: 'Markdown' };
@@ -105,6 +108,8 @@ class BotHelper {
   }
 
   sendAdmin({ text, fileObj }, chatId = TGADMIN, mark = false) {
+    if (!this.bot) return;
+
     let opts = {};
     if (mark) {
       opts = {
@@ -119,9 +124,13 @@ class BotHelper {
       text = `service: ${text}`;
     }
     if (fileObj) {
-      return this.bot.sendPhoto(chatId, fileObj, {caption: text}).catch(() => {});
+      return this.bot.sendPhoto(chatId, fileObj, {caption: text}).catch((e) => {
+        logger(e)
+      });
     }
-    return this.bot.sendMessage(chatId, text, opts);
+    return this.bot.sendMessage(chatId, text, opts).catch((e) => {
+      logger(e)
+    });
   }
 
   disDb() {
@@ -306,6 +315,15 @@ class BotHelper {
       }
     } catch (e) {
       console.log(e);
+    }
+  }
+  broadCast = () => {
+    let chatsKeys = Object.keys(this.sockets.g);
+    for (let i = 0; i < chatsKeys.length; i += 1) {
+      let chat = this.sockets.g[chatsKeys[i]];
+      if (chat && chat.ws) {
+        chat.ws.send('hej!');
+      }
     }
   }
 }
