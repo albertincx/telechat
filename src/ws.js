@@ -29,7 +29,7 @@ const initWs = (botHelper) => {
           uid1 = uid1.replace(/-/g, '');
         }
         messageObj.uid = uid1;
-        logger(messageObj.uid, messageObj.message);
+        // logger(messageObj.uid, messageObj.message);
 
         if (messageObj.g) {
           const key = `${messageObj.g}_chat_${messageObj.uid}`;
