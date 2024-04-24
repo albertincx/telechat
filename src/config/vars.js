@@ -5,9 +5,7 @@ const dotenv = require('dotenv-safe');
 const envPath = path.join(__dirname, '../../.env');
 
 const confFile = path.join(__dirname, '../../.conf');
-const cacheFile = path.join(__dirname, '../../.cache');
 if (!fs.existsSync(confFile)) fs.mkdirSync(confFile);
-if (!fs.existsSync(cacheFile)) fs.mkdirSync(cacheFile);
 
 if (fs.existsSync(envPath)) {
   dotenv.config({
@@ -23,7 +21,6 @@ module.exports = {
   logs: process.env.NODE_ENV === 'production' ? 'combined' : 'dev',
   PORT: process.env.PORT || 4000,
   NOBOT: process.env.NOBOT || '',
-  uploadDir: cacheFile,
   mongo: {
     uri: process.env.MONGO_URI,
   },

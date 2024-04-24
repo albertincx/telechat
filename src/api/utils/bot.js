@@ -307,7 +307,7 @@ class BotHelper {
           this.sockets.u[key].ws.send(txt);
         }
       }
-      if (txt.match(/#get/)) {
+      if (txt && txt.match(/#get/)) {
         //
       } else {
         await putChat({ message: txt, sender: 'admin', uid }, key).catch(
