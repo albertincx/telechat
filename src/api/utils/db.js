@@ -31,20 +31,34 @@ const clear = async (msg) => {
   return JSON.stringify(d);
 };
 
+const getKey = (val) => {
+  let newVal = '';
+  const hasSpace = val.match(/^\s/);
+  if (hasSpace) {
+    val = val.trim()
+  }
+
+  const valArr = `${val}`.split(/\s/)
+  const firstVal = valArr.shift() || '';
+
+  if (firstVal) {
+    newVal = hasSpace ? new RegExp(`${firstVal}`) : new RegExp(`^${firstVal}`);
+  }
+
+  return newVal
+}
+
 const getLast = (key, uid) => {
   if (NODB || !uid) {
     return [];
   }
   if (uid.match(/\s/)) {
-    const uidArr = `${uid}`.split(/\s/)
-    uid = uidArr.shift() || '';
-    uid = uid && new RegExp(`^${uid}`);
+      uid = getKey(uid)
   }
   if (key.match(/\s/)) {
-    const uidArr = `${key}`.split(/\s/)
-    key = uidArr.shift() || '';
-    key = key && new RegExp(`^${key}`);
+      key = getKey(key)
   }
+
   if (!key || !uid) {
     return [];
   }
