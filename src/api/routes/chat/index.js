@@ -78,28 +78,6 @@ module.exports = (bot, botHelper) => {
   bot.command(buttons.create.command, createIv);
   bot.command(buttons.createTxt.command, createIvTxt);
 
-  bot.action(/.*/, async (ctx) => {
-    const [data] = ctx.match;
-    const s = data === 'no_img';
-    if (s) return;
-    const resolveDataMatch = data.match(/^r_([0-9]+)_([0-9]+)/);
-    if (resolveDataMatch) {
-      let [, msgId, userId] = resolveDataMatch;
-      const extra = { reply_to_message_id: msgId };
-      let error = '';
-      try {
-        await bot.telegram.sendMessage(userId, messages.resolved(), extra);
-      } catch (e) {
-        error = JSON.stringify(e);
-      }
-      const { update: { callback_query } } = ctx;
-      const { message: { text, message_id }, from } = callback_query;
-      let RESULT = `${text}\nResolved! ${error}`;
-      await bot.telegram.editMessageText(from.id, message_id, null, RESULT).
-        catch(console.log);
-    }
-  });
-
   const onMessage = async ({ message: msg, reply }) => {
     let { reply_to_message } = msg;
     let document = msg.document;

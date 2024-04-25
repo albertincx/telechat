@@ -74,7 +74,7 @@ const initWs = (botHelper) => {
 
             fs.writeFile(filePath, base64Data, 'base64', () => {
               messageObj.message = 'Screen shot';
-              botHelper.sendPhot(CHAT_ID, { source: fs.readFileSync(filePath) }, getMessage(messageObj)).then(()=>{
+              botHelper.sendTgPhoto(CHAT_ID, { source: fs.readFileSync(filePath) }, getMessage(messageObj)).then(()=>{
                 fs.unlinkSync(filePath);
               });
             });

@@ -70,7 +70,7 @@ class BotHelper {
     return kkey;
   }
 
-  sendPhot(chatId, fileObj, text, key) {
+  sendTgPhoto(chatId, fileObj, text, key) {
     return this.bot.sendPhoto(chatId, fileObj, {caption: text}).
     catch(() => {
       return this.sendAdmin({text: `${this.getKey(key)} ${text}`, fileObj});

@@ -1,14 +1,11 @@
 const Any = require('../models/any.model');
 const { NODB } = require('../../config/vars');
 
-const links = Any.collection.conn.model(
+const messages = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
 
 const uids = Any.collection.conn.model(
   process.env.MONGO_COLL_LINKS || 'uids', Any.schema);
-
-const logs = Any.collection.conn.model(process.env.MONGO_COLL_LOGS || 'logs',
-  Any.schema);
 
 const statUids = async () => {
   const cnt = await uids.countDocuments();
@@ -19,7 +16,7 @@ const stat = async (coll = '') => {
     const cnt = await statUids();
   return cnt;
   }
-  const cnt = await links.countDocuments();
+  const cnt = await messages.countDocuments();
   return cnt;
 };
 
@@ -30,15 +27,31 @@ const clear = async (msg) => {
     return Promise.resolve('empty');
   }
   const s = new RegExp(`^https?:\/\/${search}`);
-  const d = await links.deleteMany({ url: s });
+  const d = await messages.deleteMany({ url: s });
   return JSON.stringify(d);
 };
 
-const getLast = (key, uid) => !NODB && links.find({ key, uid }).sort(
-    { createdAt: -1 }).limit(20);
+const getLast = (key, uid) => {
+  if (NODB || !uid) {
+    return [];
+  }
+  if (uid.match(/\s/)) {
+    const uidArr = `${uid}`.split(/\s/)
+    uid = uidArr.shift() || '';
+    uid = new RegExp(`^${uid}`);
+  }
+  if (key.match(/\s/)) {
+    const uidArr = `${key}`.split(/\s/)
+    key = uidArr.shift() || '';
+    key = new RegExp(`^${key}`);
+  }
+
+  return messages.find({key, uid}).sort(
+      {createdAt: -1}).limit(20)
+};
 
 const get = async (url) => {
-  const me = await links.findOne({ url });
+  const me = await messages.findOne({ url });
   if (me) {
     await updateOne({ url });
     return me.toObject();
@@ -49,17 +62,11 @@ const get = async (url) => {
 const updateOne = async (item) => {
   const { url } = item;
   item.$inc = { affects: 1 };
-  return links.updateOne({ url }, item, { upsert: true });
-};
-
-const log = async (item) => {
-  const { url } = item;
-  item.$inc = { affects: 1 };
-  return logs.updateOne({ url }, item, { upsert: true });
+  return messages.updateOne({ url }, item, { upsert: true });
 };
 
 const putChat = async ({ g, u, pathname, host, ...item }, key) => {
-  return !NODB && links.bulkWrite([
+  return !NODB && messages.bulkWrite([
     {
       insertOne: {
         document: { key, ...item },
@@ -92,4 +99,3 @@ module.exports.getLast = getLast;
 module.exports.putChat = putChat;
 module.exports.putUidUser = putUidUser;
 module.exports.getUidUser = getUidUser;
-module.exports.log = log;
