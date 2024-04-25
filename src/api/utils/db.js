@@ -38,12 +38,15 @@ const getLast = (key, uid) => {
   if (uid.match(/\s/)) {
     const uidArr = `${uid}`.split(/\s/)
     uid = uidArr.shift() || '';
-    uid = new RegExp(`^${uid}`);
+    uid = uid && new RegExp(`^${uid}`);
   }
   if (key.match(/\s/)) {
     const uidArr = `${key}`.split(/\s/)
     key = uidArr.shift() || '';
-    key = new RegExp(`^${key}`);
+    key = key && new RegExp(`^${key}`);
+  }
+  if (!key || !uid) {
+    return [];
   }
 
   return messages.find({key, uid}).sort(
