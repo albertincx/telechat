@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-var uid = require('uid-safe').sync;
+var uidSafe = require('uid-safe').sync;
 const fs = require('fs');
 
 const { putChat, getLast } = require('./api/utils/db');
@@ -23,25 +23,29 @@ const initWs = (botHelper) => {
       try {
         messageObj = JSON.parse(message);
         let isUndef = false;
-        if (!messageObj.uid) isUndef = true;
-        let uid1 = messageObj.uid || uid(5);
+        if (!messageObj.uid) {
+          isUndef = true;
+        }
+
+        let uid1 = messageObj.uid || uidSafe(5);
         if (isUndef) {
           uid1 = uid1.replace(/-/g, '');
         }
-        messageObj.uid = uid1;
-        // logger(messageObj.uid, messageObj.message);
+
+        const messageUid = uid1 && `${uid1}`.trim();
+        messageObj.uid = messageUid;
 
         if (messageObj.g) {
-          const key = `${messageObj.g}_chat_${messageObj.uid}`;
+          const key = `${messageObj.g}_chat_${messageUid}`;
           if (messageObj.service === 'lastmes') {
             let result = [];
             try {
-              const lastMess = await getLast(key, messageObj.uid);
+              const lastMess = await getLast(key, messageUid);
               if (lastMess) result = lastMess;
             } catch (e) {
               logger(e);
             }
-            const service = { service: 'lastmes', message: messageObj.uid };
+            const service = { service: 'lastmes', message: messageUid };
             service.lastMess = result;
             logger('lastMess', result.length);
             ws.send(JSON.stringify(service));
@@ -50,11 +54,11 @@ const initWs = (botHelper) => {
           if (!sockets.g[key]) {
             let lastMess = [];
             if (!messageObj.isRec) {
-              lastMess = await getLast(key, messageObj.uid);
+              lastMess = await getLast(key, messageUid);
             }
-            sockets.g[key] = { ws, userId: messageObj.uid };
+            sockets.g[key] = { ws, userId: messageUid };
             if (isUndef || lastMess.length) {
-              const service = { service: 'setUid', message: messageObj.uid };
+              const service = { service: 'setUid', message: messageUid };
               ws.send(JSON.stringify(service));
             }
             ws.on('close', () => {
