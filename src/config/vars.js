@@ -14,15 +14,15 @@ if (fs.existsSync(envPath)) {
         sample: path.join(__dirname, '../../.env.example'),
     });
 }
-
+global.isDev = process.env.DEV === '1'
 module.exports = {
     root: path.join(__dirname, '/../../'),
     env: process.env.NODE_ENV,
     logs: process.env.NODE_ENV === 'production' ? 'combined' : 'dev',
     PORT: process.env.PORT || 4000,
-    NOBOT: process.env.NOBOT || '',
+    NO_BOT: process.env.NO_BOT || '',
     mongo: {
         uri: process.env.MONGO_URI,
     },
-    NODB: process.env.NODB === '1',
+    NO_DB: process.env.NO_DB === '1',
 };

@@ -1,4 +1,4 @@
-const {NOBOT} = require('./config/vars');
+const {NO_BOT} = require('./config/vars');
 const mongoose = require('./config/mongoose');
 const botroute = require('./api/routes/botroute');
 const initCron = require('./cron');
@@ -6,11 +6,11 @@ const BotHelper = require('./api/utils/bot');
 const conn = mongoose.connect();
 let botInstance, bot;
 
-if (!NOBOT && process.env.TBTKN) {
+if (!NO_BOT && process.env.TBTKN) {
     botInstance = require('./config/bot');
     if (botInstance) {
-        const {bot: bh} = botroute(botInstance, conn);
-        bot = bh;
+        const {botHelper} = botroute(botInstance, conn);
+        bot = botHelper;
     }
 } else {
     bot = new BotHelper(null);

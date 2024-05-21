@@ -1,33 +1,38 @@
 const messages = require('../../../messages');
-const keyboards = require('./keyboards');
-const buttons = require('../../../config/buttons');
 
 let username = process.env.TBTUSERNAME;
 
-const support = ({reply}) => {
+const support = (ctx) => {
     const sup = [];
     for (let i = 0; i < 5; i += 1) {
         let sl = process.env[`SUP_LINK${i || ''}`];
         if (sl) sup.push(sl);
     }
-    reply(messages.support(sup), {
+    ctx.reply(messages.support(sup), {
         disable_web_page_preview: true,
     }).catch(() => {
     });
 };
 
-const back = ({reply}) => {
-    reply(messages.menu(), keyboards.start()).catch(() => {
-    });
-};
+const startOrHelp = async (ctx, botHelper) => {
+    const {message, ...msg} = ctx;
+    console.log(ctx);
 
-const startOrHelp = async ({reply, message, ...msg}, botHelper) => {
     const opts = {
         disable_web_page_preview: true
     };
-    let introtxt = '';
-    if (process.env.POST_LINK) introtxt = `\n Intro ${process.env.POST_LINK}`;
-    let text = messages.startEmpty(introtxt);
+
+    const isPrivate = message.chat.type === 'private';
+
+    let text = '';
+
+    if (isPrivate) {
+        ctx.reply(messages.startEmpty(), opts).catch((e) => {
+            console.log(e)
+        });
+        return;
+    }
+
     let isStartMessage = true;
     try {
         if (msg.update && msg.update.message) {
@@ -53,30 +58,26 @@ const startOrHelp = async ({reply, message, ...msg}, botHelper) => {
         botHelper.forward(2, -1001487355894, message.from.id).catch(console.log);
         botHelper.sendAdmin({text: `${JSON.stringify(message.from)}`});
     } else {
-        reply(text, opts).catch((e) => console.log(e));
+        ctx.reply(text, opts).catch((e) => console.log(e));
     }
 };
 
 module.exports = (bot, botHelper) => {
-    bot.command(['start', buttons.help.command],
-        ctx => startOrHelp(ctx, botHelper));
-    bot.hears(buttons.help.label, startOrHelp);
-    bot.hears(buttons.back.label, back);
-    bot.hears(buttons.support.label, support);
-    bot.command(buttons.support.command, support);
+    bot.command('start', ctx => startOrHelp(ctx, botHelper));
+    bot.command('support', support);
 
-    const onMessage = async ({message: msg, reply}) => {
+    const onMessage = async (ctx) => {
+        let {message: msg} = ctx;
         let {reply_to_message} = msg;
         let document = msg.document;
         let rpl = reply_to_message;
         if (!document && rpl) document = rpl.document;
-        const {chat: {id: chatId}, caption} = msg;
+        const {chat: {id: chatId}} = msg;
         let {text} = msg;
         if (rpl) {
             // const sKey = botHelper.getSocketKey(1, text);
             // console.log(rpl, sKey);
-            if (rpl.text === txtDocMessage) {
-            } else if (!document) {
+            if (!document) {
                 await botHelper.sockSend(chatId, text, rpl.text);
                 return;
             }
@@ -87,7 +88,7 @@ module.exports = (bot, botHelper) => {
             let s = msg.left_chat_participant ? 'left' : 'add';
             if ((msg.new_chat_participant && msg.new_chat_participant.username ===
                 username) || msg.group_chat_created) {
-                await reply(messages.start(username, chatId)).catch(
+                await ctx.reply(messages.start(username, chatId)).catch(
                     () => {
                     });
             }
@@ -95,5 +96,5 @@ module.exports = (bot, botHelper) => {
         }
     };
     bot.hears(/.*/, (ctx) => onMessage(ctx));
-    bot.on('message', ({update, reply}) => onMessage({...update, reply}));
+    bot.on('message', ctx => onMessage(ctx));
 };

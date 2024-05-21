@@ -1,5 +1,5 @@
 const Any = require('../models/any.model');
-const {NODB} = require('../../config/vars');
+const {NO_DB} = require('../../config/vars');
 
 const messages = Any.collection.conn.model(
     process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
@@ -49,7 +49,7 @@ const getKey = (val) => {
 }
 
 const getLast = (key, uid) => {
-    if (NODB || !uid) {
+    if (NO_DB || !uid) {
         return [];
     }
     if (uid.match(/\s/)) {
@@ -83,7 +83,7 @@ const updateOne = async (item) => {
 };
 
 const putChat = async ({g, u, pathname, host, ...item}, key) => {
-    return !NODB && messages.bulkWrite([
+    return !NO_DB && messages.bulkWrite([
         {
             insertOne: {
                 document: {key, ...item},

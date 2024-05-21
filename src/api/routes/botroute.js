@@ -3,6 +3,7 @@ const express = require('express');
 const BotHelper = require('../utils/bot');
 const chat = require('./chat');
 const db = require('../utils/db');
+const logger = require("../utils/logger");
 
 const router = express.Router();
 const filepath = 'count.txt';
@@ -56,19 +57,18 @@ module.exports = (bot, conn) => {
 
     chat(bot, botHelper);
 
-    bot.launch().catch((e) => {
-        console.log('___ERROR BOT')
-        console.log(e)
-        console.log('___ERROR BOT')
-    });
+    bot.launch();
 
-    if ((startCnt % 10) === 0 || process.env.DEV) {
+    if ((startCnt % 10) === 0 || global.isDev) {
         botHelper.sendAdmin({text: `started ${startCnt} times`});
     }
-
     startCnt += 1;
     if (startCnt >= 500) startCnt = 0;
     fs.writeFileSync(filepath, `${startCnt}`);
 
-    return {router, bot: botHelper};
+    // Enable graceful stop
+    process.once('SIGINT', () => bot.stop('SIGINT'))
+    process.once('SIGTERM', () => bot.stop('SIGTERM'))
+
+    return {router, botHelper};
 };

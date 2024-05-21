@@ -47,7 +47,6 @@ const initWs = (botHelper) => {
                         }
                         const service = {service: 'lastmes', message: messageUid};
                         service.lastMess = result;
-                        logger('lastMess', result.length);
                         ws.send(JSON.stringify(service));
                         return;
                     }

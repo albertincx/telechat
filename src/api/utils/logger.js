@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const logger = (content, file) => {
-    if (process.env.DEV) {
+    if (global.isDev) {
         if (file) {
             fs.writeFileSync(`.conf/${file}`, `${content}`);
         } else {

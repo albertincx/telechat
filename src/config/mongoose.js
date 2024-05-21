@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const {mongo, NODB} = require('./vars');
+const {mongo, NO_DB} = require('./vars');
 
 exports.connect = (uriStr) => {
     const uri = uriStr || mongo.uri;
-    if (!uri || NODB) return false;
+    if (!uri || NO_DB) return false;
 
     mongoose.connect(uri, {
         connectTimeoutMS: 30000,
