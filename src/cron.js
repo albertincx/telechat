@@ -1,74 +1,74 @@
 const fs = require('fs');
-const { CronJob } = require('cron');
+const {CronJob} = require('cron');
 
 const CRON_SEP = ':';
 const JOB_SEP = ',';
 
 function cron(crontime, tasks, botHelper) {
-  console.log(`init cron ${crontime} ${tasks}`);
-  const job = new CronJob(`${crontime}`, async () => {
-    if (process.env.DEV) {
-      const d = new Date();
-      console.log(`created task ${crontime} `, d);
-      botHelper.broadCast();
-    }
-    for (let i = 0; i < tasks.length; i += 1) {
-      const taskName = tasks[i];
-      try {
-        // eslint-disable-next-line import/no-dynamic-require
-        const microtasks = require(`./service/commands/${taskName}`);
-        // eslint-disable-next-line no-await-in-loop
-        await microtasks.run({ cronJob: crontime }, botHelper);
-      } catch (e) {
+    console.log(`init cron ${crontime} ${tasks}`);
+    const job = new CronJob(`${crontime}`, async () => {
         if (process.env.DEV) {
-          console.log(`task error ${taskName}`);
-          console.log(e);
+            const d = new Date();
+            console.log(`created task ${crontime} `, d);
+            botHelper.broadCast();
         }
-      }
-    }
-  });
-  job.start();
+        for (let i = 0; i < tasks.length; i += 1) {
+            const taskName = tasks[i];
+            try {
+                // eslint-disable-next-line import/no-dynamic-require
+                const microtasks = require(`./service/commands/${taskName}`);
+                // eslint-disable-next-line no-await-in-loop
+                await microtasks.run({cronJob: crontime}, botHelper);
+            } catch (e) {
+                if (process.env.DEV) {
+                    console.log(`task error ${taskName}`);
+                    console.log(e);
+                }
+            }
+        }
+    });
+    job.start();
 }
 
 function initCron(botHelper) {
-  const crontime = process.env.NODE_CRON || '5';
-  const crontasks = process.env.CRON_TASKS || '';
+    const crontime = process.env.NODE_CRON || '5';
+    const crontasks = process.env.CRON_TASKS || '';
 
-  const crons = crontime.split(CRON_SEP);
-  const tasks = crontasks.split(CRON_SEP);
+    const crons = crontime.split(CRON_SEP);
+    const tasks = crontasks.split(CRON_SEP);
 
-  try {
-    if (crons && crons.length) {
-      for (let i = 0; i < crons.length; i += 1) {
-        let crontime = `0 */${crons[i]} * * * *`.trim();
-        if (crontime && tasks[i]) {
-          const jobs = tasks[i].split(JOB_SEP);
-          if (jobs && jobs.length) {
-            const tasks = [];
-            for (let t = 0; t < jobs.length; t += 1) {
-              const taskName = `${jobs[t]}`.trim();
-              const cmdPath = `${__dirname}/service/commands/${taskName}.js`;
-              if (fs.existsSync(cmdPath)) {
-                tasks.push(taskName);
-              }
+    try {
+        if (crons && crons.length) {
+            for (let i = 0; i < crons.length; i += 1) {
+                let crontime = `0 */${crons[i]} * * * *`.trim();
+                if (crontime && tasks[i]) {
+                    const jobs = tasks[i].split(JOB_SEP);
+                    if (jobs && jobs.length) {
+                        const tasks = [];
+                        for (let t = 0; t < jobs.length; t += 1) {
+                            const taskName = `${jobs[t]}`.trim();
+                            const cmdPath = `${__dirname}/service/commands/${taskName}.js`;
+                            if (fs.existsSync(cmdPath)) {
+                                tasks.push(taskName);
+                            }
+                        }
+                        if (tasks.length) {
+                            console.log(tasks, crontime);
+                            cron(crontime, tasks, botHelper);
+                        }
+                    } else {
+                        console.log(`no jobs ${crontime}`);
+                    }
+                } else {
+                    console.log(`empty ${crontime}`);
+                }
             }
-            if (tasks.length) {
-              console.log(tasks, crontime);
-              cron(crontime, tasks, botHelper);
-            }
-          } else {
-            console.log(`no jobs ${crontime}`);
-          }
         } else {
-          console.log(`empty ${crontime}`);
+            console.log('no crons');
         }
-      }
-    } else {
-      console.log('no crons');
+    } catch (e) {
+        console.log(e);
     }
-  } catch (e) {
-    console.log(e);
-  }
 }
 
 module.exports = initCron;
