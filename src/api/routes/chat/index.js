@@ -15,9 +15,7 @@ const support = (ctx) => {
 };
 
 const startOrHelp = async (ctx, botHelper) => {
-    const {message, ...msg} = ctx;
-    console.log(ctx);
-
+    const {message, payload, ...msg} = ctx;
     const opts = {
         disable_web_page_preview: true
     };
@@ -26,9 +24,9 @@ const startOrHelp = async (ctx, botHelper) => {
 
     let text = '';
 
-    if (isPrivate) {
+    if (isPrivate && !payload) {
         ctx.reply(messages.startEmpty(), opts).catch((e) => {
-            console.log(e)
+            console.log(e);
         });
         return;
     }
@@ -36,8 +34,7 @@ const startOrHelp = async (ctx, botHelper) => {
     let isStartMessage = true;
     try {
         if (msg.update && msg.update.message) {
-            const result = await botHelper.processUpdateMessage(
-                msg.update.message);
+            const result = await botHelper.processUpdateMessage(msg.update.message);
             if (result.text) {
                 text = result.text;
                 if (result.mode) {
@@ -47,7 +44,7 @@ const startOrHelp = async (ctx, botHelper) => {
             } else {
                 if (msg.update.message.chat.id < 0) {
                     isStartMessage = false;
-                    text = messages.start(username, msg.update.message.chat.id);
+                    text = messages.start(username, msg.update.message.chat);
                 }
             }
         }
@@ -58,14 +55,32 @@ const startOrHelp = async (ctx, botHelper) => {
         botHelper.forward(2, -1001487355894, message.from.id).catch(console.log);
         botHelper.sendAdmin({text: `${JSON.stringify(message.from)}`});
     } else {
-        ctx.reply(text, opts).catch((e) => console.log(e));
+        ctx.reply(text, opts).catch((e) => {
+            console.log(e);
+        });
     }
 };
+
+/** @type BotHelper */
+const closeTopic = (ctx, botHelper) => {
+    const {chat, message_thread_id} = ctx.message
+    botHelper.closeTopic(chat.id, message_thread_id);
+    return ctx.reply('Topic closed').catch((e) => {
+        console.log(e);
+    });
+}
+
+/** @type BotHelper */
+const deleteTopic = (ctx, botHelper) => {
+    const {chat, message_thread_id} = ctx.message
+    return botHelper.deleteTopic(chat.id, message_thread_id);
+}
 
 module.exports = (bot, botHelper) => {
     bot.command('start', ctx => startOrHelp(ctx, botHelper));
     bot.command('support', support);
-
+    bot.command('closetopic', ctx => closeTopic(ctx, botHelper));
+    bot.command('deletetopic', ctx => deleteTopic(ctx, botHelper));
     const onMessage = async (ctx) => {
         let {message: msg} = ctx;
         let {reply_to_message} = msg;
@@ -76,7 +91,6 @@ module.exports = (bot, botHelper) => {
         let {text} = msg;
         if (rpl) {
             // const sKey = botHelper.getSocketKey(1, text);
-            // console.log(rpl, sKey);
             if (!document) {
                 await botHelper.sockSend(chatId, text, rpl.text);
                 return;

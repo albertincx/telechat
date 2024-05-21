@@ -19,9 +19,9 @@ function setHours(date, hours, minus = true) {
     return new Date(d.getTime());
 }
 
-function includeScriptInline(ID) {
-    return ' window.instantChatBotUidName = \'userId\';'
-        + `window.__arsfChatIdg='${ID}';window.__arsfChatUrl = 'api.cafechat.app';` +
+function includeScriptInline(ID, supGr) {
+    return ' window.instantChatBotUidName = \'uniqUserId\';'
+        + `window.__arsfChatIdg='${ID}${supGr ? '_S' : ''}';window.__arsfChatUrl = 'api.cafechat.app';` +
         'var newScript = document.createElement(\'script\');'
         + 'newScript.type = \'text/javascript\';'
         +
@@ -31,16 +31,14 @@ function includeScriptInline(ID) {
         'document.getElementsByTagName("head")[0].appendChild(newScript);';
 }
 
-function includeScript(ID) {
-    return `<script type="text/\`+\`javascript">window.__arsfChatIdg='${ID}';window.__arsfChatUrl = 'api.cafechat.app';
-window.instantChatBotUidName = 'userId'</script>
+function includeScript(ID, supGr) {
+    return ` <script type="text/\`+\`javascript">window.__arsfChatIdg='${ID}${supGr ? '_S' : ''}';window.__arsfChatUrl = 'api.cafechat.app';
+window.instantChatBotUidName = 'uniqUserId'</script>
 <script src="//${process.env.APP_DOMAINNAME2}/start.js" async></script>`;
 }
 
 class BotHelper {
-
     constructor(bot) {
-
         this.bot = bot;
         let c = {};
         try {
@@ -51,6 +49,13 @@ class BotHelper {
         this.socketsLocal = {};
         this.socketsLocalUid = {};
     }
+    getMessage = (messageObj) => {
+        if (typeof messageObj === 'string') return messageObj;
+        const type = messageObj.type || 'u';
+
+        return `
+#${type}${messageObj.uid}:\n${messageObj.message}`
+    };
 
     setSockets(s) {
         this.sockets = s;
@@ -72,20 +77,22 @@ class BotHelper {
         return kkey;
     }
 
-    sendTgPhoto(chatId, fileObj, text, key) {
+    sendTgPhoto(chatId, fileObj, messageObj, key) {
+        const text = this.getMessage(messageObj);
         return this.bot.sendPhoto(chatId, fileObj, {caption: text}).catch(() => {
             return this.sendAdmin({text: `${this.getKey(key)} ${text}`, fileObj});
         });
     }
 
-    async botMes(chatId, text, key = '', mark = false) {
+    async botMes(chatId, messageObj, key = '', mark = false) {
         if (!this.bot) return;
+        const text = this.getMessage(messageObj);
 
         let opts = {};
         if (mark) {
             opts = {parse_mode: 'Markdown'};
         }
-        const SUPER_G = process.env.SUPER_GROUP;
+        const SUPER_G = messageObj.superGroup;
 
         const params = {
             chat_id: chatId,
@@ -94,25 +101,20 @@ class BotHelper {
         };
         const sockKey = this.getSocketKey(chatId, text);
         const socketItem = this.sockets.g[sockKey];
-        // console.log(sockKey, key, socketItem);
 
         if (SUPER_G) {
-            chatId = +SUPER_G
             if (socketItem && socketItem.topId) {
                 opts.message_thread_id = socketItem.topId;
             } else {
-                await this.bot.createForumTopic(SUPER_G, text).then(msg => {
-                    //{ message_thread_id: 9, name: '#u231 Test: test', icon_color: 7322096 }
-                    console.log(msg);
-                    // chatId = msg.message_thread_id;
+                await this.bot.createForumTopic(chatId, text).then(msg => {
                     opts.message_thread_id = msg.message_thread_id;
-                    this.sockets.g[''].topId = msg.message_thread_id;
-                    // params.message_thread_id = msg.message_thread_id;
+                    if (socketItem) {
+                        this.sockets.g[sockKey].topId = msg.message_thread_id;
+                    }
                 });
             }
         }
-        console.log(params, opts, this.socketsLocal, this.socketsLocalUid, this.sockets);
-        // const {chat_id, message_thread_id} = params;
+
         return this.bot.sendMessage(chatId, text, opts).catch((e) => {
             console.log(e);
             this.sendAdmin({text: `${this.getKey(key)} ${text}`}, process.env.TGGROUP);
@@ -203,24 +205,27 @@ class BotHelper {
         let ID = '';
         let result = {};
         const str = text.match('-?[0-9]+');
-        const strTg = text.match(' tg-?[0-9]+');
+        const strTg = text.match('tg-?[0-9]+');
+        const supGr = text.match('_sup');
+
         if (str && str[0]) {
             ID = +str[0];
 
             if (strTg) {
+                const superGroup = text.match('sup-');
                 result.text = messages.startChat();
-                await this.localSockSend(ID, 'joined to chat', null, chat.id);
+                await this.localSockSend(ID, 'joined to chat', null, chat.id, superGroup);
             } else {
                 if (ID < 0) ID *= -1;
-
                 let codes = [];
-                codes.push(includeScript(ID));
-                codes.push(includeScriptInline(ID));
+                codes.push(includeScript(ID, supGr));
+                codes.push(includeScriptInline(ID, supGr));
                 result.text = messages.startCode(codes) +
-                    `\n\n ${messages.startTg(ID)}\n\n \`\`\`*\`\`\`instantChatBotUidName - unique user id`;
+                    `\n\n *instantChatBotUidName* - unique user id\n\n ${messages.startTg(ID, supGr)}`;
                 result.mode = 'Markdown';
             }
         }
+
         return result;
     }
 
@@ -248,10 +253,12 @@ class BotHelper {
             if (this.socketsLocal[key]) {
                 msg = `#tgchat${chatId}:\n${txt}`;
                 let {userId} = this.socketsLocal[key];
+
                 return this.botMes(userId, msg, chatId);
             }
             msg = messages.notFound();
         }
+
         return this.botMes(userId || chatId, msg, chatId);
     }
 
@@ -271,7 +278,7 @@ class BotHelper {
         };
     }
 
-    async localSockSend(chatId, txt, uidID, userId = false) {
+    async localSockSend(chatId, txt, uidID, userId, superGroup = false) {
         if (!uidID) {
             uidID = uid(5);
             uidID = uidID.replace(/-/g, '');
@@ -283,8 +290,13 @@ class BotHelper {
             userId,
             chatId,
         });
-        let msg = `#tgu${uidID}:\n${txt}`;
-        return this.botMes(chatId, msg, chatId);
+        const messageObj = {
+            superGroup,
+            type: 'tgu',
+            uid: uidID,
+            message: txt
+        };
+        return this.botMes(chatId, messageObj, chatId);
     }
 
     getSocketKey(chatId, rplText) {
@@ -359,6 +371,12 @@ class BotHelper {
                 chat.ws.send('hej!');
             }
         }
+    }
+    closeTopic (chatId, top) {
+        this.bot.closeForumTopic(chatId, top);
+    }
+    deleteTopic (chatId, top) {
+        this.bot.deleteForumTopic(chatId, top)
     }
 }
 

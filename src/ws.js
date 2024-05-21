@@ -8,9 +8,7 @@ const logger = require("./api/utils/logger");
 
 const sockets = {g: {}, u: {}};
 
-const getMessage = (messageObj) => `
-          #u${messageObj.uid}:\n${messageObj.message}`;
-
+/** @type BotHelper */
 const initWs = (botHelper) => {
     botHelper && botHelper.setSockets(sockets);
     const wss = new WebSocket.Server({port: PORT});
@@ -34,61 +32,69 @@ const initWs = (botHelper) => {
 
                 const messageUid = uid1 && `${uid1}`.trim();
                 messageObj.uid = messageUid;
+                if (!messageObj.g) {
+                    return;
+                }
 
-                if (messageObj.g) {
-                    const key = `${messageObj.g}_chat_${messageUid}`;
-                    if (messageObj.service === 'lastmes') {
-                        let result = [];
-                        try {
-                            const lastMess = await getLast(key, messageUid);
-                            if (lastMess) result = lastMess;
-                        } catch (e) {
-                            logger(e);
-                        }
-                        const service = {service: 'lastmes', message: messageUid};
-                        service.lastMess = result;
+                const groupID = messageObj.g.replace(/_S/, '');
+                const supGr = messageObj.g.match(/_S/);
+                messageObj.g = groupID;
+                if (supGr) {
+                    messageObj.superGroup = true;
+                }
+
+                const key = `${groupID}_chat_${messageUid}`;
+                if (messageObj.service === 'lastmes') {
+                    let result = [];
+                    try {
+                        const lastMess = await getLast(key, messageUid);
+                        if (lastMess) result = lastMess;
+                    } catch (e) {
+                        logger(e);
+                    }
+                    const service = {service: 'lastmes', message: messageUid};
+                    service.lastMess = result;
+                    ws.send(JSON.stringify(service));
+                    return;
+                }
+                if (!sockets.g[key]) {
+                    let lastMess = [];
+                    if (!messageObj.isRec) {
+                        lastMess = await getLast(key, messageUid);
+                    }
+                    sockets.g[key] = {ws, userId: messageUid};
+                    if (isUndef || lastMess.length) {
+                        const service = {service: 'setUid', message: messageUid};
                         ws.send(JSON.stringify(service));
+                    }
+                    ws.on('close', () => {
+                        delete sockets.g[key];
+                    });
+                }
+                const CHAT_ID = +groupID * -1;
+
+                if (messageObj.img) {
+                    if (messageObj.message === 'logs') {
+                        messageObj.message = messageObj.img;
+                        botHelper.botMes(CHAT_ID, messageObj, groupID);
                         return;
                     }
-                    if (!sockets.g[key]) {
-                        let lastMess = [];
-                        if (!messageObj.isRec) {
-                            lastMess = await getLast(key, messageUid);
-                        }
-                        sockets.g[key] = {ws, userId: messageUid};
-                        if (isUndef || lastMess.length) {
-                            const service = {service: 'setUid', message: messageUid};
-                            ws.send(JSON.stringify(service));
-                        }
-                        ws.on('close', () => {
-                            delete sockets.g[key];
-                        });
-                    }
-                    const CHAT_ID = +messageObj.g * -1;
+                    const filePath = `./${new Date().getTime()}`;
+                    const base64Data = messageObj.img.replace(/^data:([A-Za-z-+/]+);base64,/, '');
 
-                    if (messageObj.img) {
-                        if (messageObj.message === 'logs') {
-                            messageObj.message = messageObj.img;
-                            botHelper.botMes(CHAT_ID, getMessage(messageObj), messageObj.g);
-                            return;
-                        }
-                        const filePath = `./${new Date().getTime()}`;
-                        const base64Data = messageObj.img.replace(/^data:([A-Za-z-+/]+);base64,/, '');
-
-                        fs.writeFile(filePath, base64Data, 'base64', () => {
-                            messageObj.message = 'Screen shot';
-                            botHelper.sendTgPhoto(CHAT_ID, {source: fs.readFileSync(filePath)}, getMessage(messageObj)).then(() => {
-                                fs.unlinkSync(filePath);
-                            });
+                    fs.writeFile(filePath, base64Data, 'base64', () => {
+                        messageObj.message = 'Screen shot';
+                        botHelper.sendTgPhoto(CHAT_ID, {source: fs.readFileSync(filePath)}, messageObj).then(() => {
+                            fs.unlinkSync(filePath);
                         });
-                        return;
-                    }
-                    if (!messageObj.login) {
-                        await putChat(messageObj, key).catch((e) => {
-                            logger(e);
-                        });
-                        botHelper.botMes(CHAT_ID, getMessage(messageObj), messageObj.g);
-                    }
+                    });
+                    return;
+                }
+                if (!messageObj.login) {
+                    await putChat(messageObj, key).catch((e) => {
+                        logger(e);
+                    });
+                    botHelper.botMes(CHAT_ID, messageObj, groupID);
                 }
             } catch (e) {
                 logger(e)
