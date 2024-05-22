@@ -76,7 +76,9 @@ const initWs = (botHelper) => {
                         ws.send(JSON.stringify(service));
                     }
                     ws.on('close', () => {
-                        delete botHelper.sockets.g[key];
+                        if (botHelper.sockets.g[key]) {
+                            delete botHelper.sockets.g[key].ws;
+                        }
                     });
                 } else {
                     botHelper.sockets.g[key].ws = ws;
