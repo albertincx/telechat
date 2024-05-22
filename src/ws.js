@@ -54,22 +54,32 @@ const initWs = (botHelper) => {
                     }
                     const service = {service: 'lastmes', message: messageUid};
                     service.lastMess = result;
+                    if (!botHelper.sockets.g[key]) {
+                        botHelper.sockets.g[key] = {ws, userId: messageUid};
+                    }
                     ws.send(JSON.stringify(service));
                     return;
                 }
-                if (!sockets.g[key]) {
+                if (!botHelper.sockets.g[key]) {
                     let lastMess = [];
                     if (!messageObj.isRec) {
                         lastMess = await getLast(key, messageUid);
                     }
-                    sockets.g[key] = {ws, userId: messageUid};
+                    if (botHelper.sockets.g[key]) {
+                        botHelper.sockets.g[key].ws = ws;
+                        botHelper.sockets.g[key].userId = messageUid;
+                    } else {
+                        botHelper.sockets.g[key] = {ws, userId: messageUid};
+                    }
                     if (isUndef || lastMess.length) {
                         const service = {service: 'setUid', message: messageUid};
                         ws.send(JSON.stringify(service));
                     }
                     ws.on('close', () => {
-                        delete sockets.g[key];
+                        delete botHelper.sockets.g[key];
                     });
+                } else {
+                    botHelper.sockets.g[key].ws = ws;
                 }
                 const CHAT_ID = +groupID * -1;
 

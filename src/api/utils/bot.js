@@ -49,6 +49,7 @@ class BotHelper {
         this.socketsLocal = {};
         this.socketsLocalUid = {};
     }
+
     getMessage = (messageObj) => {
         if (typeof messageObj === 'string') return messageObj;
         const type = messageObj.type || 'u';
@@ -94,14 +95,10 @@ class BotHelper {
         }
         const SUPER_G = messageObj.superGroup;
 
-        const params = {
-            chat_id: chatId,
-            text,
-            ...opts,
-        };
         const sockKey = this.getSocketKey(chatId, text);
         const socketItem = this.sockets.g[sockKey];
 
+        // console.log(SUPER_G, socketItem.userId, Object.keys(socketItem.ws));
         if (SUPER_G) {
             if (socketItem && socketItem.topId) {
                 opts.message_thread_id = socketItem.topId;
@@ -111,6 +108,8 @@ class BotHelper {
                     if (socketItem) {
                         this.sockets.g[sockKey].topId = msg.message_thread_id;
                     }
+                }).catch(e => {
+                    console.log(e)
                 });
             }
         }
@@ -125,8 +124,11 @@ class BotHelper {
         let chats = Object.keys(this.socketsLocal);
         let now = new Date();
         let hour = 0.1;
+        logger('clean');
         for (let i = 0; i < chats.length; i += 1) {
             let skId = chats[i];
+            logger('clean', skId);
+
             let now1 = setHours(this.socketsLocal[skId].createdAt, hour, false);
             if (now1 < now) {
                 let {userId, chatId} = this.socketsLocal[skId];
@@ -372,10 +374,12 @@ class BotHelper {
             }
         }
     }
-    closeTopic (chatId, top) {
+
+    closeTopic(chatId, top) {
         this.bot.closeForumTopic(chatId, top);
     }
-    deleteTopic (chatId, top) {
+
+    deleteTopic(chatId, top) {
         this.bot.deleteForumTopic(chatId, top)
     }
 }
