@@ -95,10 +95,14 @@ class BotHelper {
         }
         const SUPER_G = messageObj.superGroup;
 
-        const sockKey = this.getSocketKey(chatId, text);
-        const socketItem = this.sockets.g[sockKey];
+        let sockKey = this.getSocketKey(chatId, text);
+        let socketItem = this.sockets.g[sockKey];
+        const isLocalChat = messageObj && messageObj.local;
 
-        // console.log(SUPER_G, socketItem.userId, Object.keys(socketItem.ws));
+        if (isLocalChat) {
+            sockKey = messageObj.sKey;
+            socketItem = this.socketsLocal[sockKey];
+        }
         if (SUPER_G) {
             if (socketItem && socketItem.topId) {
                 opts.message_thread_id = socketItem.topId;
@@ -106,7 +110,11 @@ class BotHelper {
                 await this.bot.createForumTopic(chatId, text).then(msg => {
                     opts.message_thread_id = msg.message_thread_id;
                     if (socketItem) {
-                        this.sockets.g[sockKey].topId = msg.message_thread_id;
+                        if (isLocalChat) {
+                            this.socketsLocal[sockKey].topId = msg.message_thread_id;
+                        } else {
+                            this.sockets.g[sockKey].topId = msg.message_thread_id;
+                        }
                     }
                 }).catch(e => {
                     console.log(e)
@@ -238,7 +246,14 @@ class BotHelper {
             let keyUid = `${chatId}_${userId}`;
             let uidFromGroup = this.socketsLocalUid[keyUid];
             if (uidFromGroup) {
-                return this.localSockSend(chatId, txt, uidFromGroup, userId);
+                let superGroup = false, socketItem;
+                let sKey = this.getLocalSocketKey(chatId, uidFromGroup);
+                if (this.socketsLocal[sKey]) {
+                    socketItem = this.socketsLocal[sKey];
+                    superGroup = socketItem.topId;
+                }
+
+                return this.localSockSend(chatId, txt, uidFromGroup, userId, superGroup);
             }
             msg = messages.startChat();
             await this.localSockSend(chatId, 'joined to chat', null, userId);
@@ -292,13 +307,22 @@ class BotHelper {
             userId,
             chatId,
         });
+        let sKey = this.getLocalSocketKey(chatId, uidID);
+
         const messageObj = {
             superGroup,
             type: 'tgu',
             uid: uidID,
-            message: txt
+            message: txt,
+            local: true,
+            sKey,
         };
+
         return this.botMes(chatId, messageObj, chatId);
+    }
+
+    getLocalSocketKey(chatId, uidFromGroup) {
+        return `${chatId}_${uidFromGroup}`;
     }
 
     getSocketKey(chatId, rplText) {
