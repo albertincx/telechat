@@ -3,6 +3,7 @@ const uid = require('uid-safe').sync;
 const {putChat, putUidUser, getUidUser} = require('../utils/db');
 const messages = require('../../messages');
 const logger = require("./logger");
+const {LOST_WS_ERROR} = require("../constants");
 
 const TG_ADMIN = parseInt(process.env.TGADMIN);
 
@@ -344,49 +345,55 @@ class BotHelper {
 
     async sockSend(chatId, txt, rplText) {
         if (!rplText) return;
+
         let luid = rplText.match(/#tgu(.*?):/);
+
         if (luid && luid[1]) {
             luid = luid[1];
+
             return this.localSockReply(chatId, txt, luid);
         }
+
         let tgChat = rplText.match(/#tgchat(.*?):/);
+
         if (tgChat && tgChat[1]) {
             tgChat = tgChat[1];
+
             return this.localSockReply(tgChat, txt, luid, chatId);
         }
         let uid = rplText.match(/#u(.*?):/);
-        if (uid && uid[1]) {
-            uid = uid[1];
-        }
+
+        if (uid && uid[1]) uid = uid[1];
+
         let guid = rplText.match(/#group(.*?):/);
 
-        if (guid && guid[1]) {
-            chatId = guid[1];
-        }
+        if (guid && guid[1]) chatId = guid[1];
+
         chatId = `${chatId}`.replace('--', '-');
         let key = +chatId;
-        try {
-            if (key < 0) {
-                key *= -1;
-                key = `${key}_chat_${uid}`.replace('--', '-');
-                if (this.sockets.g[key]) {
+        let error = '';
+        if (key < 0) {
+            key *= -1;
+            key = `${key}_chat_${uid}`.replace('--', '-');
+            error = LOST_WS_ERROR
+            if (this.sockets.g[key]) {
+                try {
                     this.sockets.g[key].ws.send(txt);
-                }
-            } else {
-                if (this.sockets.u[key]) {
-                    this.sockets.u[key].ws.send(txt);
+                    error = '';
+                } catch (e) {
+                    logger(e)
                 }
             }
-            if (txt && txt.match(/#get/)) {
-                //
-            } else {
-                await putChat({message: txt, sender: 'admin', uid}, key).catch(
-                    () => {
-                    });
-            }
-        } catch (e) {
-            console.log(e);
         }
+        if (txt && txt.match(/#get/)) {
+            //
+        } else {
+            await putChat({message: txt, sender: 'admin', uid}, key).catch((e) => {
+                logger(e)
+            });
+        }
+
+        return error;
     }
 
     broadCast = () => {
