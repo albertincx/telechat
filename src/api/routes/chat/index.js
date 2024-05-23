@@ -1,6 +1,5 @@
 const messages = require('../../../messages');
 const {LOST_WS_ERROR} = require("../../constants");
-const logger = require("../../utils/logger");
 
 let username = process.env.TBTUSERNAME;
 
@@ -96,9 +95,15 @@ module.exports = (bot, botHelper) => {
             if (!document) {
                 const error = await botHelper.sockSend(chatId, text, rpl);
                 if (error === LOST_WS_ERROR) {
-                    ctx.reply('User disconnected, your message saved', {reply_to_message_id: msg.message_id}).catch((e) => {
-                        logger(e)
-                    });
+                    botHelper.sendReaction(chatId, msg.message_id, [
+                        {
+                            type: 'emoji',
+                            emoji: '👌',
+                        }
+                    ]);
+                    // ctx.reply('User disconnected, your message saved', {reply_to_message_id: msg.message_id}).catch((e) => {
+                    //     logger(e)
+                    // });
                 }
 
                 return;

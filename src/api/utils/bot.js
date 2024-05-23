@@ -422,6 +422,10 @@ class BotHelper {
     deleteTopic(chatId, top) {
         this.bot.deleteForumTopic(chatId, top)
     }
+
+    sendReaction(...args) {
+        return this.bot.setMessageReaction(...args).catch(console.error);
+    }
 }
 
 module.exports = BotHelper;
