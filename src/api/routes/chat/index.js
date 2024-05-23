@@ -94,7 +94,7 @@ module.exports = (bot, botHelper) => {
         if (rpl) {
             // const sKey = botHelper.getSocketKey(1, text);
             if (!document) {
-                const error = await botHelper.sockSend(chatId, text, rpl.text);
+                const error = await botHelper.sockSend(chatId, text, rpl);
                 if (error === LOST_WS_ERROR) {
                     ctx.reply('User disconnected, your message saved', {reply_to_message_id: msg.message_id}).catch((e) => {
                         logger(e)

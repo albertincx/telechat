@@ -343,7 +343,9 @@ class BotHelper {
         return key
     }
 
-    async sockSend(chatId, txt, rplText) {
+    async sockSend(chatId, txt, rpl) {
+        const {text: rplText, from} = rpl;
+
         if (!rplText) return;
 
         let luid = rplText.match(/#tgu(.*?):/);
@@ -361,6 +363,9 @@ class BotHelper {
 
             return this.localSockReply(tgChat, txt, luid, chatId);
         }
+        if (!from.is_bot) {
+            return;
+        }
         let uid = rplText.match(/#u(.*?):/);
 
         if (uid && uid[1]) uid = uid[1];
@@ -372,25 +377,29 @@ class BotHelper {
         chatId = `${chatId}`.replace('--', '-');
         let key = +chatId;
         let error = '';
-        if (key < 0) {
-            key *= -1;
-            key = `${key}_chat_${uid}`.replace('--', '-');
-            error = LOST_WS_ERROR
-            if (this.sockets.g[key]) {
-                try {
-                    this.sockets.g[key].ws.send(txt);
-                    error = '';
-                } catch (e) {
-                    logger(e)
+
+        if (uid) {
+            if (key < 0) {
+                key *= -1;
+                key = `${key}_chat_${uid}`.replace('--', '-');
+                error = uid && LOST_WS_ERROR
+                if (this.sockets.g[key]) {
+                    try {
+                        this.sockets.g[key].ws.send(txt);
+                        error = '';
+                    } catch (e) {
+                        logger(e)
+                    }
                 }
             }
-        }
-        if (txt && txt.match(/#get/)) {
-            //
-        } else {
-            await putChat({message: txt, sender: 'admin', uid}, key).catch((e) => {
-                logger(e)
-            });
+            // uid
+            if (txt && txt.match(/#get/)) {
+                //
+            } else {
+                await putChat({message: txt, sender: 'admin', uid}, key).catch((e) => {
+                    logger(e)
+                });
+            }
         }
 
         return error;
