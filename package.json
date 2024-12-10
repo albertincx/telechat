@@ -50,7 +50,7 @@
     "socks5-https-client": "^1.2.1",
     "statuses": "^2.0.1",
     "telegraf": "^4.16.3",
-    "tgsend": "^0.0.2",
+    "tgsend": "^0.0.3",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.43.0",
     "uid-safe": "^2.1.5",
     "wget-improved": "^3.4.0",
