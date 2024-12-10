@@ -1,9 +1,26 @@
 async function run(params, botHelper) {
     try {
-        let url = process.env.TEST_API;
-        if (!url) return;
-        await botHelper.clearUnusedChats();
-        // await botHelper.sendAdmin('cron test check url', process.env.TGGROUP);
+        const chat = {
+            chat: {id: botHelper.tgAdmin},
+            text: '',
+        };
+
+        const broadcastIsOn = botHelper.getConf('broadcast');
+        // console.log('broadcastIsOn');
+        // console.log(broadcastIsOn);
+        if (broadcastIsOn) {
+            botHelper.startBroad({
+                message: {
+                    ...chat,
+                    text: `/${broadcastIsOn}`
+                },
+                reply: (s) => {
+                    console.log(s);
+                    botHelper.sendAdmin(s);
+                    return {catch: (cb) => cb()};
+                }
+            });
+        }
     } catch (e) {
         console.log(e);
     }

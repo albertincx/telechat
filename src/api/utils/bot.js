@@ -1,12 +1,15 @@
+const broadcast = require('tgsend');
 const fs = require('fs');
 const uid = require('uid-safe').sync;
 const {putChat, putUidUser, getUidUser} = require('../utils/db');
 const messages = require('../../messages');
 const logger = require("./logger");
 const {LOST_WS_ERROR} = require("../constants");
+const {createConnection} = require("mongoose");
 
 const TG_ADMIN = parseInt(process.env.TGADMIN);
-
+const OFF = 'Off';
+const ON = 'On';
 const _OFF = 'Off';
 const _ON = 'On';
 
@@ -46,6 +49,7 @@ class BotHelper {
             c = JSON.parse(`${fs.readFileSync('.conf/config.json')}`);
         } catch (e) {
         }
+        this.tgAdmin = TG_ADMIN;
         this.config = c;
         this.socketsLocal = {};
         this.socketsLocalUid = {};
@@ -179,21 +183,31 @@ class BotHelper {
     }
 
     parseConfig(params) {
-        let content = '';
-        let param = '';
-        let c = params.replace(' _content', '_content').split(/\s/);
-        if (c.length === 2) {
-            param = c[0];
-            content = c[1].replace(/~/g, ' ');
+        let content;
+        if (params[0] === '_') {
+            // eslint-disable-next-line no-unused-vars
+            const [_, param, ...val] = params.split('_');
+            params = `${param} ${val.join('_')}`;
+        }
+        let config = params.replace(' _content', '_content');
+        config = config.split(/\s/);
+        let [param] = config;
+
+        if (config.length === 2) {
+            content = config[1].replace(/~/g, ' ');
+            if (this.config[param] === content) content = OFF;
         } else {
-            param = c[0];
-            if (this.config[param] === _ON) {
-                content = _OFF;
+            if (this.config[param] === ON || this.config[param]) {
+                content = OFF;
             } else {
-                content = _ON;
+                content = ON;
             }
         }
-        return {param, content};
+
+        return {
+            param,
+            content
+        };
     }
 
     toggleConfig(msg) {
@@ -405,16 +419,6 @@ class BotHelper {
         return error;
     }
 
-    broadCast = () => {
-        let chatsKeys = Object.keys(this.sockets.g);
-        for (let i = 0; i < chatsKeys.length; i += 1) {
-            let chat = this.sockets.g[chatsKeys[i]];
-            if (chat && chat.ws) {
-                chat.ws.send('hej!');
-            }
-        }
-    }
-
     closeTopic(chatId, top) {
         this.bot.closeForumTopic(chatId, top);
     }
@@ -425,6 +429,38 @@ class BotHelper {
 
     sendReaction(...args) {
         return this.bot.setMessageReaction(...args).catch(console.error);
+    }
+
+    getConf(param) {
+        const configParam = this.config[param] || this.config[`_${param}`];
+
+        return configParam === OFF ? '' : configParam;
+    }
+
+    getMidMessage(mId) {
+        let mMessage = process.env[`MID_MESSAGE${mId}`] || '';
+        mMessage = mMessage.replace('*', '\n');
+        return mMessage;
+    }
+
+    startBroad(ctx) {
+        try {
+            if (ctx.message.text.match('createBroadcast')) {
+                this.conn = createConnection(process.env.MONGO_URI_SECOND);
+            }
+            this.connSend = createConnection(process.env.MONGO_URI_BROAD);
+            console.log('start')
+            broadcast(ctx, this);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    forwardMes(mid, from, to) {
+        if (this.worker) {
+            return Promise.resolve();
+        }
+        return this.bot.forwardMessage(to, from, mid);
     }
 }
 

@@ -84,6 +84,15 @@ module.exports = (bot, botHelper) => {
     bot.command('deletetopic', ctx => deleteTopic(ctx, botHelper));
     const onMessage = async (ctx) => {
         let {message: msg} = ctx;
+        // console.log(msg);
+        if (
+            msg &&
+            msg.text &&
+            msg.text.match(/(createBroadcast|startBroadcast)/)
+        ) {
+            botHelper.startBroad(ctx)
+            return;
+        }
         let {reply_to_message} = msg;
         let document = msg.document;
         let rpl = reply_to_message;

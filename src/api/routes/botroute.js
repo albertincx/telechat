@@ -55,6 +55,12 @@ module.exports = (bot, conn) => {
         }
     });
 
+    bot.command(/^config/, ({message}) => {
+        if (botHelper.isAdmin(message.chat.id)) {
+            botHelper.toggleConfig(message);
+        }
+    });
+
     chat(bot, botHelper);
 
     bot.launch();
