@@ -16,7 +16,7 @@ async function run(params, botHelper) {
                 },
                 reply: (s) => {
                     console.log(s);
-                    botHelper.sendAdmin(s);
+                    botHelper.sendAdmin({text: s});
                     return {catch: (cb) => cb()};
                 }
             });

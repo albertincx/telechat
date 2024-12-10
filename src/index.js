@@ -11,9 +11,10 @@ if (!NO_BOT && process.env.TBTKN) {
     if (botInstance) {
         const {botHelper} = botroute(botInstance, conn);
         bot = botHelper;
+        initCron(bot);
     }
 } else {
     bot = new BotHelper(null);
 }
 require('./ws.js')(bot);
-initCron(bot);
+
