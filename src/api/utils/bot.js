@@ -86,7 +86,9 @@ class BotHelper {
     sendTgPhoto(chatId, fileObj, messageObj, key) {
         const text = this.getMessage(messageObj);
         return this.bot.sendPhoto(chatId, fileObj, {caption: text}).catch(() => {
-            return this.sendAdmin({text: `${this.getKey(key)} ${text}`, fileObj});
+            return this.bot.sendPhoto(TG_ADMIN, fileObj, {caption: `${this.getKey(key)} ${text}`}).catch((e) => {
+                logger(e);
+            });
         });
     }
 
@@ -129,7 +131,7 @@ class BotHelper {
 
         return this.bot.sendMessage(chatId, text, opts).catch((e) => {
             console.log(e);
-            this.sendAdmin({text: `${this.getKey(key)} ${text}`}, process.env.TGGROUP);
+            this.sendAdmin(`${this.getKey(key)} ${text}`, process.env.TGGROUP);
         });
     }
 
@@ -152,7 +154,7 @@ class BotHelper {
         }
     }
 
-    sendAdmin({text, fileObj}, chatId = TG_ADMIN, mark = false) {
+    sendAdmin(text, chatId = TG_ADMIN, mark = false) {
         if (!this.bot) return;
 
         let opts = {};
@@ -167,11 +169,6 @@ class BotHelper {
         }
         if (chatId === TG_ADMIN) {
             text = `service: ${text}`;
-        }
-        if (fileObj) {
-            return this.bot.sendPhoto(chatId, fileObj, {caption: text}).catch((e) => {
-                logger(e)
-            });
         }
         return this.bot.sendMessage(chatId, text, opts).catch((e) => {
             logger(e)

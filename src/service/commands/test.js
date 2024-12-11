@@ -15,8 +15,7 @@ async function run(params, botHelper) {
                     text: `/${broadcastIsOn}`
                 },
                 reply: (s) => {
-                    console.log(s);
-                    botHelper.sendAdmin({text: s});
+                    botHelper.sendAdmin(s);
                     return {catch: (cb) => cb()};
                 }
             });

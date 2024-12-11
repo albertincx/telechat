@@ -110,7 +110,7 @@ const initWs = (botHelper) => {
                 }
             } catch (e) {
                 logger(e)
-                botHelper.sendAdmin({text: `${e}`});
+                botHelper.sendAdmin(`${e}`);
             }
         });
     });

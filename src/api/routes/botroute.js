@@ -51,7 +51,7 @@ module.exports = (bot, conn) => {
 
     bot.command('srv', ({message}) => {
         if (botHelper.isAdmin(message.from.id)) {
-            botHelper.sendAdmin({text: `srv: ${JSON.stringify(message)}`});
+            botHelper.sendAdmin(`srv: ${JSON.stringify(message)}`);
         }
     });
 
@@ -66,7 +66,7 @@ module.exports = (bot, conn) => {
     bot.launch();
 
     if ((startCnt % 10) === 0 || global.isDev) {
-        botHelper.sendAdmin({text: `started ${startCnt} times`});
+        botHelper.sendAdmin(`started ${startCnt} times`);
     }
     startCnt += 1;
     if (startCnt >= 500) startCnt = 0;

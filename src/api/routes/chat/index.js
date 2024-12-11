@@ -3,16 +3,26 @@ const {LOST_WS_ERROR} = require("../../constants");
 
 let username = process.env.TBTUSERNAME;
 
-const support = (ctx) => {
-    const sup = [];
-    for (let i = 0; i < 5; i += 1) {
-        let sl = process.env[`SUP_LINK${i || ''}`];
-        if (sl) sup.push(sl);
+let IV_CHAN_MID = 3;
+let IV_CHAN_ID = 1001487355894;
+
+const support = async (ctx, botHelper) => {
+    let system = JSON.stringify(ctx.message.from);
+    const {
+        chat: {id: chatId},
+    } = ctx.message;
+
+    try {
+        if (!Number.isNaN(IV_CHAN_MID)) {
+            botHelper
+                .forwardMes(IV_CHAN_MID, IV_CHAN_ID * -1, chatId)
+                .catch(() => {
+                });
+        }
+    } catch (e) {
+        system = `${e}${system}`;
     }
-    ctx.reply(messages.support(sup), {
-        disable_web_page_preview: true,
-    }).catch(() => {
-    });
+    botHelper.sendAdmin(`support ${system}`);
 };
 
 const startOrHelp = async (ctx, botHelper) => {
@@ -54,7 +64,7 @@ const startOrHelp = async (ctx, botHelper) => {
     }
     if (isStartMessage) {
         botHelper.forward(2, -1001487355894, message.from.id).catch(console.log);
-        botHelper.sendAdmin({text: `${JSON.stringify(message.from)}`});
+        botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
     } else {
         ctx.reply(text, opts).catch((e) => {
             console.log(e);
@@ -128,7 +138,7 @@ module.exports = (bot, botHelper) => {
                     () => {
                     });
             }
-            botHelper.sendAdmin({text: `support ${s}${JSON.stringify(msg)}`});
+            botHelper.sendAdmin(`support ${s}${JSON.stringify(msg)}`);
         }
     };
     bot.hears(/.*/, (ctx) => onMessage(ctx));
