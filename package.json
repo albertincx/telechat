@@ -44,7 +44,7 @@
     "jsbn": "^1.1.0",
     "lodash": "^4.17.21",
     "method-override": "^3.0.0",
-    "mongoose": "^8.8.4",
+    "mongoose": "^7.6.13",
     "nodemon": "^3.1.7",
     "showdown": "^2.1.0",
     "statuses": "^2.0.1",
