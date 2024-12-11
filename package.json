@@ -1,5 +1,5 @@
 {
-  "name": "HelloBot",
+  "name": "telechat",
   "version": "1.0.0",
   "description": "Telegram Bot For Chat",
   "author": "Al <albertincx@gmail.com>",
@@ -7,7 +7,8 @@
   "private": false,
   "license": "MIT",
   "engines": {
-    "yarn": "*"
+    "yarn": "*",
+    "node": ">=18.0.0"
   },
   "scripts": {
     "precommit": "yarn lint",
@@ -43,14 +44,12 @@
     "jsbn": "^1.1.0",
     "lodash": "^4.17.21",
     "method-override": "^3.0.0",
-    "mongoose": "^7.6.3",
-    "nodemon": "^3.1.0",
-    "sanitize-html": "^2.13.0",
+    "mongoose": "^8.8.4",
+    "nodemon": "^3.1.7",
     "showdown": "^2.1.0",
-    "socks5-https-client": "^1.2.1",
     "statuses": "^2.0.1",
     "telegraf": "^4.16.3",
-    "tgsend": "^0.0.3",
+    "tgsend": "^0.0.4",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.43.0",
     "uid-safe": "^2.1.5",
     "wget-improved": "^3.4.0",
