@@ -1,5 +1,6 @@
 # Use yarn.lock instead
 package-lock.json
+yarn.lock
 data/
 .conf/
 images/

@@ -22,7 +22,12 @@ const support = async (ctx, botHelper) => {
     } catch (e) {
         system = `${e}${system}`;
     }
-    botHelper.sendAdmin(`support ${system}`);
+    console.log(Object.keys(botHelper));
+    try {
+        botHelper && botHelper.sendAdmin(`support ${system}`);
+    } catch (e) {
+        console.log(e);
+    }
 };
 
 const startOrHelp = async (ctx, botHelper) => {
