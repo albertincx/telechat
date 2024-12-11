@@ -44,6 +44,7 @@ const startOrHelp = async (ctx, botHelper) => {
         ctx.reply(messages.startEmpty(), opts).catch((e) => {
             console.log(e);
         });
+        botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
         return;
     }
 
