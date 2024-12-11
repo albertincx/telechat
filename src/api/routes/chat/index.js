@@ -140,7 +140,7 @@ module.exports = (bot, botHelper) => {
             let s = msg.left_chat_participant ? 'left' : 'add';
             if ((msg.new_chat_participant && msg.new_chat_participant.username ===
                 username) || msg.group_chat_created) {
-                await ctx.reply(messages.start(username, chatId)).catch(
+                await ctx.reply(messages.start(username, msg.chat)).catch(
                     () => {
                     });
             }
