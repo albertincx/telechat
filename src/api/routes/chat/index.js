@@ -89,7 +89,7 @@ const deleteTopic = (ctx, botHelper) => {
 
 module.exports = (bot, botHelper) => {
     bot.command('start', ctx => startOrHelp(ctx, botHelper));
-    bot.command('support', support);
+    bot.command('support', ctx => support(ctx, botHelper));
     bot.command('closetopic', ctx => closeTopic(ctx, botHelper));
     bot.command('deletetopic', ctx => deleteTopic(ctx, botHelper));
     const onMessage = async (ctx) => {
