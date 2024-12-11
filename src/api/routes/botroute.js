@@ -61,6 +61,17 @@ module.exports = (bot, conn) => {
         }
     });
 
+    bot.command('restartApp', ({message}) => {
+        if (botHelper.isAdmin(message.chat.id)) {
+            let app = 'Telechat';
+
+            const {spawn} = require('child_process');
+            const rest = spawn('pm2', ['restart', app, '--time']);
+            rest.stdout.pipe(process.stdin);
+            botHelper.sendAdmin('restarted');
+        }
+    });
+
     chat(bot, botHelper);
 
     bot.launch();
