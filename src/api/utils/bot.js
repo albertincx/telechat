@@ -5,7 +5,7 @@ const {putChat, putUidUser, getUidUser} = require('../utils/db');
 const messages = require('../../messages');
 const logger = require("./logger");
 const {LOST_WS_ERROR} = require("../constants");
-const {createConnection} = require("mongoose");
+const {createConnection, Schema} = require("mongoose");
 
 const TG_ADMIN = parseInt(process.env.TGADMIN);
 const OFF = 'Off';
@@ -458,7 +458,10 @@ class BotHelper {
                 this.conn = createConnection(process.env.MONGO_URI_SECOND);
             }
             this.connSend = createConnection(process.env.MONGO_URI_BROAD);
-            console.log('start')
+            this.schema = new Schema({}, {
+                strict: false,
+                versionKey: false
+            });
             broadcast(ctx, this);
         } catch (e) {
             console.log(e);
