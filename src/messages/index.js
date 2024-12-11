@@ -14,7 +14,10 @@ module.exports = {
         return `\nor Direct chat in telegram \n https://t.me/${username}?start=${sup ? 'sup-': ''}tg-${id}`
     },
 
-    startEmpty: (intro = '') => 'Please add me to group  ' + intro,
+    startEmpty: (intro = '') => `Please add me to group  
+\n
+[Why?](https://telegra.ph/InstantChatBot-guide-12-11)
+    ` + intro,
 
     startChat: () => 'Wait for response...\nThis chat will be disconnected in an hour from the last answer',
 

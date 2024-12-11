@@ -33,7 +33,7 @@ const support = async (ctx, botHelper) => {
 const startOrHelp = async (ctx, botHelper) => {
     const {message, payload, ...msg} = ctx;
     const opts = {
-        disable_web_page_preview: true
+        disable_web_page_preview: true,
     };
 
     const isPrivate = message.chat.type === 'private';
@@ -41,7 +41,10 @@ const startOrHelp = async (ctx, botHelper) => {
     let text = '';
 
     if (isPrivate && !payload) {
-        ctx.reply(messages.startEmpty(), opts).catch((e) => {
+        ctx.reply(messages.startEmpty(), {
+            ...opts,
+            parse_mode: 'Markdown',
+        }).catch((e) => {
             console.log(e);
         });
         botHelper.sendAdmin(`${JSON.stringify(message.from)}`);
