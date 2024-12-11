@@ -71,7 +71,11 @@ module.exports = (bot, conn) => {
             botHelper.sendAdmin('restarted');
         }
     });
-
+    bot.command('gitPull', ({message}) => {
+        if (botHelper.isAdmin(message.from.id)) {
+            botHelper.gitPull();
+        }
+    });
     chat(bot, botHelper);
 
     bot.launch();

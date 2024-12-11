@@ -70,6 +70,18 @@ class BotHelper {
     isAdmin(chatId) {
         return chatId === TG_ADMIN;
     }
+    gitPull() {
+        const {spawn} = require('child_process');
+        const gPull = spawn('git pull && pm2 restart Telechat --time', {shell: true});
+        let log = 'Res: ';
+        gPull.stdout.on('data', data => {
+            log += `${data}`;
+        });
+        gPull.stdout.on('end', () => {
+            logger(log);
+            this.sendAdmin(log);
+        });
+    }
 
     getKey(key) {
         let kkey = '';
