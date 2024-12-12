@@ -460,7 +460,6 @@ class BotHelper {
             this.connSend = createConnection(process.env.MONGO_URI_BROAD);
             this.schema = new Schema({}, {
                 strict: false,
-                versionKey: false
             });
             broadcast(ctx, this);
         } catch (e) {
