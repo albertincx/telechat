@@ -119,8 +119,10 @@ const getCol = (key) => {
 const putItem = async ({...item}, key) => {
     let col = getCol(key);
     if (!col) return;
-    // console.log(item);
-    return col.updateOne(item._id ? {_id: item._id} : {}, item, {upsert: true});
+    let defFilter = item._id ? {_id: item._id} : {};
+    if (key === dbKeys.hosts) defFilter = {host: item.host};
+
+    return col.updateOne(defFilter, item, {upsert: true});
 };
 
 module.exports.stat = stat;
