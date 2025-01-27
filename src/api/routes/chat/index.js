@@ -84,6 +84,9 @@ const startOrHelp = async (ctx, botHelper) => {
 /** @type BotHelper */
 const closeTopic = (ctx, botHelper) => {
     const {chat, message_thread_id} = ctx.message
+    if (!message_thread_id) {
+        return botHelper.sendAdmin(` close topic error ${JSON.stringify(ctx.message)}`);
+    }
     botHelper.closeTopic(chat.id, message_thread_id);
     return ctx.reply('Topic closed').catch((e) => {
         console.log(e);
@@ -101,6 +104,7 @@ module.exports = (bot, botHelper) => {
     bot.command('support', ctx => support(ctx, botHelper));
     bot.command('closetopic', ctx => closeTopic(ctx, botHelper));
     bot.command('deletetopic', ctx => deleteTopic(ctx, botHelper));
+
     const onMessage = async (ctx) => {
         let {message: msg} = ctx;
         // console.log(msg);
