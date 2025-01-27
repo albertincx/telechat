@@ -13,7 +13,7 @@
   "scripts": {
     "precommit": "yarn lint",
     "start": "NODE_ENV=production node ./src/index.js",
-    "dev": "DEV=1 PORT=1234 NODE_ENV=production nodemon ./src/index.js",
+    "dev": "DEV=1 PORT=3001 NODE_ENV=production nodemon ./src/index.js",
     "devOff": "NO_BOT=1 NO_DB=1 DEV=1 PORT=1234 NODE_ENV=production nodemon ./src/index.js"
   },
   "repository": {

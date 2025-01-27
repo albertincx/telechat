@@ -2,9 +2,10 @@ const WebSocket = require('ws');
 var uidSafe = require('uid-safe').sync;
 const fs = require('fs');
 
-const {putChat, getLast} = require('./api/utils/db');
+const {putChat, getLast, putItem} = require('./api/utils/db');
 const {PORT} = require('./config/vars');
 const logger = require("./api/utils/logger");
+const {dbKeys} = require("./api/constants");
 
 const sockets = {g: {}, u: {}};
 
@@ -20,6 +21,8 @@ const initWs = (botHelper) => {
             let messageObj = {};
             try {
                 messageObj = JSON.parse(message);
+                global.isDev && console.log(messageObj);
+
                 let isUndef = false;
                 if (!messageObj.uid) {
                     isUndef = true;
@@ -32,10 +35,13 @@ const initWs = (botHelper) => {
 
                 const messageUid = uid1 && `${uid1}`.trim();
                 messageObj.uid = messageUid;
-                if (!messageObj.g) {
-                    return;
-                }
+                if (!messageObj.g) return;
 
+                if (messageObj.host) {
+                    await putItem(messageObj, dbKeys.hosts).catch((e) => {
+                        logger(e);
+                    });
+                }
                 const groupID = messageObj.g.replace(/_S/, '');
                 const supGr = messageObj.g.match(/_S/);
                 messageObj.g = groupID;

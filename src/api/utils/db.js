@@ -1,11 +1,12 @@
 const Any = require('../models/any.model');
 const {NO_DB} = require('../../config/vars');
+const {dbKeys} = require("../constants");
 
 const messages = Any.collection.conn.model(
     process.env.MONGO_COLL_LINKS || 'messages', Any.schema);
 
-const uids = Any.collection.conn.model(
-    process.env.MONGO_COLL_LINKS || 'uids', Any.schema);
+const uids = Any.collection.conn.model(process.env.MONGO_COLL_LINKS || 'uids', Any.schema);
+const hosts = Any.collection.conn.model(process.env.MONGO_COLL_LINKS || 'hosts', Any.schema);
 
 const statUids = async () => {
     const cnt = await uids.countDocuments();
@@ -108,9 +109,24 @@ const putUidUser = async ({g, u, ...item}, key) => {
             },
         }]);
 };
+
+const getCol = (key) => {
+    if (key === dbKeys.hosts) {
+        return hosts;
+    }
+}
+
+const putItem = async ({...item}, key) => {
+    let col = getCol(key);
+    if (!col) return;
+    // console.log(item);
+    return col.updateOne(item._id ? {_id: item._id} : {}, item, {upsert: true});
+};
+
 module.exports.stat = stat;
 module.exports.clear = clear;
 module.exports.updateOne = updateOne;
+module.exports.putItem = putItem;
 module.exports.get = get;
 module.exports.getLast = getLast;
 module.exports.putChat = putChat;
